@@ -1,7 +1,10 @@
+use std::os::raw::c_uint;
 use thiserror::Error;
 
+// TODO: may want to deny dead_code
+#[allow(dead_code)]
 #[derive(Error, Debug)]
-enum JsError {
+pub enum JsError {
     /// Category of errors that relates to incorrect usage of the API itself.
     #[error("Category of errors that relates to incorrect usage of the API itself.")]
     CategoryUsage,
@@ -227,4 +230,62 @@ enum JsError {
     /// VM was unable to perform the request action.
     #[error("VM was unable to perform the request action.")]
     DiagUnableToPerformAction,
+}
+
+impl JsError {
+    fn from(error_code: c_uint) -> Option<Self> {
+        match error_code {
+            0 => None,
+            65536 => Some(JsError::CategoryUsage),
+            65537 => Some(JsError::InvalidArgument),
+            65538 => Some(JsError::NullArgument),
+            65539 => Some(JsError::NoCurrentContext),
+            65540 => Some(JsError::InExceptionState),
+            65541 => Some(JsError::NotImplemented),
+            65542 => Some(JsError::WrongThread),
+            65543 => Some(JsError::RuntimeInUse),
+            65544 => Some(JsError::BadSerializedScript),
+            65545 => Some(JsError::InDisabledState),
+            65546 => Some(JsError::CannotDisableExecution),
+            65547 => Some(JsError::HeapEnumInProgress),
+            65548 => Some(JsError::ArgumentNotObject),
+            65549 => Some(JsError::InProfileCallback),
+            65550 => Some(JsError::InThreadServiceCallback),
+            65551 => Some(JsError::CannotSerializeDebugScript),
+            65552 => Some(JsError::AlreadyDebuggingContext),
+            65553 => Some(JsError::AlreadyProfilingContext),
+            65554 => Some(JsError::IdleNotEnabled),
+            65555 => Some(JsError::CannotSetProjectionEnqueueCallback),
+            65556 => Some(JsError::CannotStartProjection),
+            65557 => Some(JsError::InObjectBeforeCollectCallback),
+            65558 => Some(JsError::ObjectNotInspectable),
+            65559 => Some(JsError::PropertyNotSymbol),
+            65560 => Some(JsError::PropertyNotString),
+            65561 => Some(JsError::InvalidContext),
+            65562 => Some(JsError::InvalidModuleHostInfoKind),
+            65563 => Some(JsError::ModuleParsed),
+            65564 => Some(JsError::NoWeakRefRequired),
+            65565 => Some(JsError::PromisePending),
+            65566 => Some(JsError::ModuleNotEvaluated),
+            131072 => Some(JsError::CategoryEngine),
+            131073 => Some(JsError::OutOfMemory),
+            131074 => Some(JsError::BadFPUState),
+            196608 => Some(JsError::CategoryScript),
+            196609 => Some(JsError::ScriptException),
+            196610 => Some(JsError::ScriptCompile),
+            196611 => Some(JsError::ScriptTerminated),
+            196612 => Some(JsError::ScriptEvalDisabled),
+            262144 => Some(JsError::CategoryFatal),
+            262145 => Some(JsError::Fatal),
+            262146 => Some(JsError::WrongRuntime),
+            327680 => Some(JsError::CategoryDiagError),
+            327681 => Some(JsError::DiagAlreadyInDebugMode),
+            327682 => Some(JsError::DiagNotInDebugMode),
+            327683 => Some(JsError::DiagNotAtBreak),
+            327684 => Some(JsError::DiagInvalidHandle),
+            327685 => Some(JsError::DiagObjectNotFound),
+            327686 => Some(JsError::DiagUnableToPerformAction),
+            _ => unreachable!(),
+        }
+    }
 }
