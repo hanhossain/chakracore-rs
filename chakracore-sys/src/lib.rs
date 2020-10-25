@@ -7,10 +7,10 @@ include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::mem::MaybeUninit;
-    use std::ffi::{CString, CStr};
-    use std::ptr;
     use std::convert::TryInto;
+    use std::ffi::{CStr, CString};
+    use std::mem::MaybeUninit;
+    use std::ptr;
 
     fn assert_no_error(error_code: _JsErrorCode) {
         assert_eq!(error_code, _JsErrorCode_JsNoError);
@@ -26,7 +26,11 @@ mod tests {
             let mut context: MaybeUninit<JsContextRef> = MaybeUninit::uninit();
 
             // Create a runtime.
-            let res = JsCreateRuntime(_JsRuntimeAttributes_JsRuntimeAttributeNone, None, runtime.as_mut_ptr());
+            let res = JsCreateRuntime(
+                _JsRuntimeAttributes_JsRuntimeAttributeNone,
+                None,
+                runtime.as_mut_ptr(),
+            );
             assert_no_error(res);
             let runtime = runtime.assume_init();
 
@@ -46,13 +50,25 @@ mod tests {
             let fname = fname.assume_init();
 
             let mut script_source = MaybeUninit::uninit();
-            let res = JsCreateExternalArrayBuffer(script_c as *mut _, script.len() as u32, None, ptr::null_mut(), script_source.as_mut_ptr());
+            let res = JsCreateExternalArrayBuffer(
+                script_c as *mut _,
+                script.len() as u32,
+                None,
+                ptr::null_mut(),
+                script_source.as_mut_ptr(),
+            );
             assert_no_error(res);
             let script_source = script_source.assume_init();
 
             // run the script
             let mut result = MaybeUninit::uninit();
-            let res = JsRun(script_source as *mut _, 0usize, fname as *mut _, _JsParseScriptAttributes_JsParseScriptAttributeNone, result.as_mut_ptr());
+            let res = JsRun(
+                script_source as *mut _,
+                0usize,
+                fname as *mut _,
+                _JsParseScriptAttributes_JsParseScriptAttributeNone,
+                result.as_mut_ptr(),
+            );
             assert_no_error(res);
             let result = result.assume_init();
 
@@ -69,7 +85,12 @@ mod tests {
             // copy to buffer
             let total_length = length + 1;
             let mut buffer: Vec<u8> = vec![0; total_length.try_into().unwrap()];
-            let res = JsCopyString(resultJSString as *mut _, buffer.as_mut_ptr() as *mut i8, total_length, ptr::null_mut());
+            let res = JsCopyString(
+                resultJSString as *mut _,
+                buffer.as_mut_ptr() as *mut i8,
+                total_length,
+                ptr::null_mut(),
+            );
             assert_no_error(res);
 
             // convert string back and assert

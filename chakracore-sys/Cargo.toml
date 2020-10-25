@@ -10,3 +10,7 @@ edition = "2018"
 
 [build-dependencies]
 bindgen = "0.55.1"
+
+[lib]
+# disable doc tests since the docs have C++ code
+doctest = false
