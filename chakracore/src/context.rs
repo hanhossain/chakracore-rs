@@ -30,17 +30,24 @@ impl JsScriptContext {
     }
 
     /// Clears the current script context on the thread.
-    fn clear_current_context() -> Result<(), JsError> {
-        let res = unsafe { JsSetCurrentContext(std::ptr::null_mut()) };
-        JsError::assert(res)
+    ///
+    /// This does not need to be explicitly called - it will automatically be called when the
+    /// context is dropped if it was set as the current context.
+    pub fn clear_current_context(&mut self) -> Result<(), JsError> {
+        if self.is_current_context {
+            let res = unsafe { JsSetCurrentContext(std::ptr::null_mut()) };
+            JsError::assert(res)?;
+            self.is_current_context = false;
+        }
+
+        Ok(())
     }
 }
 
 impl Drop for JsScriptContext {
     fn drop(&mut self) {
-        if self.is_current_context {
-            JsScriptContext::clear_current_context().expect("Failed to clear current context.");
-        }
+        self.clear_current_context()
+            .expect("Failed to clear current context.");
     }
 }
 
