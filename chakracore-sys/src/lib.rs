@@ -99,6 +99,14 @@ mod tests {
 
             // release script_c memory
             let _ = CString::from_raw(script_c);
+
+            // clear current context
+            let res = JsSetCurrentContext(ptr::null_mut());
+            assert_no_error(res);
+
+            // dispose runtime
+            let res = JsDisposeRuntime(runtime);
+            assert_no_error(res);
         }
     }
 }

@@ -46,12 +46,6 @@ pub struct JsRuntime {
 
 impl JsRuntime {
     /// Create a new JsRuntime.
-    ///
-    /// # Example
-    /// ```
-    /// use chakracore::runtime::{JsRuntime, JsRuntimeAttributes};
-    /// let runtime = JsRuntime::new(JsRuntimeAttributes::None);
-    /// ```
     pub fn new(attributes: JsRuntimeAttributes) -> Result<Self, JsError> {
         let mut runtime: MaybeUninit<JsRuntimeHandle> = MaybeUninit::uninit();
         let res = unsafe { JsCreateRuntime(attributes.bits, None, runtime.as_mut_ptr()) };
