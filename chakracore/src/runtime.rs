@@ -41,7 +41,7 @@ bitflags! {
 }
 
 pub struct JsRuntime {
-    handle: JsRuntimeHandle,
+    pub(crate) handle: JsRuntimeHandle,
 }
 
 impl JsRuntime {
