@@ -10,6 +10,7 @@ fn main() {
 
     let bindings = bindgen::Builder::default()
         .header("wrapper.h")
+        .generate_comments(false)
         .parse_callbacks(Box::new(bindgen::CargoCallbacks))
         .generate()
         .expect("Unable to generate bindings");
