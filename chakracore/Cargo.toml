@@ -7,4 +7,6 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+bitflags = "1.2.1"
 chakracore-sys = { path = "../chakracore-sys" }
+thiserror = "1.0.21"
