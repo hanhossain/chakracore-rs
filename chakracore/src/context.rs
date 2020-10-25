@@ -21,6 +21,7 @@ impl JsScriptContext {
         })
     }
 
+    /// Sets the current script context on the thread.
     pub fn set_current_context(&mut self) -> Result<(), JsError> {
         let res = unsafe { JsSetCurrentContext(self.context) };
         JsError::assert(res)?;
@@ -28,6 +29,7 @@ impl JsScriptContext {
         Ok(())
     }
 
+    /// Clears the current script context on the thread.
     fn clear_current_context() -> Result<(), JsError> {
         let res = unsafe { JsSetCurrentContext(std::ptr::null_mut()) };
         JsError::assert(res)
