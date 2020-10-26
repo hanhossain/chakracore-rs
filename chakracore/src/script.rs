@@ -1,4 +1,5 @@
 use crate::error::JsError;
+use crate::string::JsString;
 use chakracore_sys::{JsCreateExternalArrayBuffer, JsValueRef};
 use std::ffi::CString;
 use std::mem::MaybeUninit;
@@ -6,13 +7,18 @@ use std::ptr;
 
 #[derive(Debug)]
 pub struct JsScript {
-    handle: JsValueRef,
+    pub(crate) handle: JsValueRef,
+    pub(crate) source_url: JsString,
     size: usize,
     raw: *mut i8,
 }
 
 impl JsScript {
-    pub fn new<T: Into<Vec<u8>>>(script: T) -> Result<Self, JsError> {
+    /// Convert a string into a script
+    pub fn new<TUrl: Into<Vec<u8>>, TScript: Into<Vec<u8>>>(
+        url: TUrl,
+        script: TScript,
+    ) -> Result<Self, JsError> {
         let script = CString::new(script).unwrap();
         let size = script.as_bytes().len();
         let script = script.into_raw();
@@ -27,11 +33,13 @@ impl JsScript {
                 source.as_mut_ptr(),
             )
         };
+
         JsError::assert(res)?;
         let source = unsafe { source.assume_init() };
 
         Ok(Self {
             handle: source,
+            source_url: JsString::new(url)?,
             size,
             raw: script,
         })
@@ -59,7 +67,7 @@ mod tests {
         let mut context = JsScriptContext::new(&mut runtime).unwrap();
         context.set_current_context().unwrap();
 
-        let script = JsScript::new("(() => { return 'Hello world'; })()");
+        let script = JsScript::new("hello", "(() => { return 'Hello world'; })()");
         assert!(script.is_ok());
     }
 }

@@ -5,8 +5,9 @@ use std::convert::TryInto;
 use std::ffi::{CStr, CString};
 use std::ptr;
 
+#[derive(Debug)]
 pub struct JsString {
-    handle: JsValueRef,
+    pub(crate) handle: JsValueRef,
 }
 
 impl JsString {
