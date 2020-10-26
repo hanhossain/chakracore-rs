@@ -61,8 +61,7 @@ mod tests {
         let mut runtime = JsRuntime::new(JsRuntimeAttributes::None).unwrap();
         let context = JsScriptContext::new(&mut runtime);
 
-        assert!(context.is_ok());
-        assert!(!context.unwrap().context.is_null());
+        assert_eq!(context.map(|x| x.context.is_null()), Ok(false));
     }
 
     #[test]

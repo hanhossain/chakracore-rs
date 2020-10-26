@@ -73,7 +73,6 @@ mod tests {
     #[test]
     fn create_runtime() {
         let runtime = JsRuntime::new(JsRuntimeAttributes::None);
-        assert!(runtime.is_ok());
         assert_eq!(runtime.map(|x| x.handle.is_null()), Ok(false));
     }
 }
