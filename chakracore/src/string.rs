@@ -30,7 +30,7 @@ impl JsString {
     }
 
     /// Convert to a String
-    pub fn to_string(self) -> Result<String, JsError> {
+    pub fn to_string(&self) -> Result<String, JsError> {
         // get size of buffer
         let mut length = 0;
         let res = unsafe { JsCopyString(self.handle, ptr::null_mut(), 0, &mut length) };
