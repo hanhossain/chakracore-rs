@@ -10,8 +10,8 @@ pub struct JsString {
 }
 
 impl JsString {
+    /// Create a JsString
     pub fn new<T: Into<Vec<u8>>>(value: T) -> Result<Self, JsError> {
-        // TODO: might need to keep this one, not sure if the runtime copies the data or not
         let string = CString::new(value).unwrap();
 
         let mut handle = MaybeUninit::uninit();
@@ -29,6 +29,7 @@ impl JsString {
         })
     }
 
+    /// Convert to a String
     pub fn to_string(self) -> Result<String, JsError> {
         // get size of buffer
         let mut length = 0;
