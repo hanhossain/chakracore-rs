@@ -1,12 +1,12 @@
 use crate::error::JsError;
 use crate::script::JsScript;
+use crate::string::JsString;
 use bitflags::bitflags;
 use chakracore_sys::{
-    JsCreateRuntime, JsDisposeRuntime, JsRun, JsRuntimeHandle,
+    JsConvertValueToString, JsCreateRuntime, JsDisposeRuntime, JsRun, JsRuntimeHandle, JsValueRef,
     _JsParseScriptAttributes_JsParseScriptAttributeNone,
 };
 use std::mem::MaybeUninit;
-use std::ptr;
 
 bitflags! {
     pub struct JsRuntimeAttributes: u32 {
@@ -61,19 +61,21 @@ impl JsRuntime {
         })
     }
 
-    pub fn run_script(&mut self, script: &JsScript) -> Result<(), JsError> {
+    pub fn run_script(&mut self, script: &JsScript) -> Result<JsResult, JsError> {
+        let mut result = MaybeUninit::uninit();
         let res = unsafe {
             JsRun(
                 script.handle,
                 0usize,
                 script.source_url.handle,
                 _JsParseScriptAttributes_JsParseScriptAttributeNone,
-                ptr::null_mut(),
+                result.as_mut_ptr(),
             )
         };
         JsError::assert(res)?;
+        let result = unsafe { result.assume_init() };
 
-        Ok(())
+        Ok(JsResult { handle: result })
     }
 }
 
@@ -83,6 +85,21 @@ impl Drop for JsRuntime {
             let res = JsDisposeRuntime(self.handle);
             JsError::assert(res).expect("Failed to dispose runtime.");
         }
+    }
+}
+
+pub struct JsResult {
+    handle: JsValueRef,
+}
+
+impl JsResult {
+    pub fn to_js_string(&self) -> Result<JsString, JsError> {
+        let mut result = MaybeUninit::uninit();
+        let res = unsafe { JsConvertValueToString(self.handle, result.as_mut_ptr()) };
+        JsError::assert(res)?;
+        let result = unsafe { result.assume_init() };
+
+        Ok(JsString { handle: result })
     }
 }
 
@@ -105,5 +122,17 @@ mod tests {
 
         let script = JsScript::new("test", "(() => { var a = 1 + 1; })()").unwrap();
         runtime.run_script(&script).unwrap();
+    }
+
+    #[test]
+    fn run_script_with_string_result() {
+        let mut runtime = JsRuntime::new(JsRuntimeAttributes::None).unwrap();
+        let mut context = JsScriptContext::new(&mut runtime).unwrap();
+        context.set_current_context().unwrap();
+
+        let script = JsScript::new("test", "(() => { return 'hello world'; })()").unwrap();
+        let result = runtime.run_script(&script).unwrap();
+        let s = result.to_js_string().unwrap().to_string().unwrap();
+        assert_eq!(s, "hello world".to_string());
     }
 }
