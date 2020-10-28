@@ -1,14 +1,15 @@
 // TODO: maybe convert all bitflags to upper snake case
 #![allow(non_upper_case_globals)]
 
-use crate::error::JsError;
 use crate::number::JsNumber;
 use crate::script::JsScript;
 use crate::string::JsString;
+use crate::{boolean::JsBoolean, error::JsError};
 use bitflags::bitflags;
 use chakracore_sys::{
-    JsConvertValueToNumber, JsConvertValueToString, JsCreateRuntime, JsDisposeRuntime, JsRun,
-    JsRuntimeHandle, JsValueRef, _JsParseScriptAttributes_JsParseScriptAttributeNone,
+    JsConvertValueToBoolean, JsConvertValueToNumber, JsConvertValueToString, JsCreateRuntime,
+    JsDisposeRuntime, JsRun, JsRuntimeHandle, JsValueRef,
+    _JsParseScriptAttributes_JsParseScriptAttributeNone,
 };
 use std::mem::MaybeUninit;
 
@@ -115,6 +116,16 @@ impl JsResult {
             handle: unsafe { result.assume_init() },
         })
     }
+
+    pub fn to_js_boolean(&self) -> Result<JsBoolean, JsError> {
+        let mut result = MaybeUninit::uninit();
+        let res = unsafe { JsConvertValueToBoolean(self.handle, result.as_mut_ptr()) };
+        JsError::assert(res)?;
+
+        Ok(JsBoolean {
+            handle: unsafe { result.assume_init() },
+        })
+    }
 }
 
 #[cfg(test)]
@@ -172,5 +183,17 @@ mod tests {
         let result = runtime.run_script(&script).unwrap();
         let res = result.to_js_number().unwrap().to_f64();
         assert_eq!(res, Ok(1.23));
+    }
+
+    #[test]
+    fn run_script_with_bool_result() {
+        let mut runtime = JsRuntime::new(JsRuntimeAttributes::None).unwrap();
+        let mut context = JsScriptContext::new(&mut runtime).unwrap();
+        context.set_current_context().unwrap();
+
+        let script = JsScript::new("test", "(() => { return true; })()").unwrap();
+        let result = runtime.run_script(&script).unwrap();
+        let res = result.to_js_boolean().unwrap().to_bool();
+        assert_eq!(res, Ok(true));
     }
 }
