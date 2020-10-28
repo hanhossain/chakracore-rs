@@ -1,10 +1,14 @@
+// TODO: maybe convert all bitflags to upper snake case
+#![allow(non_upper_case_globals)]
+
 use crate::error::JsError;
+use crate::number::JsNumber;
 use crate::script::JsScript;
 use crate::string::JsString;
 use bitflags::bitflags;
 use chakracore_sys::{
-    JsConvertValueToString, JsCreateRuntime, JsDisposeRuntime, JsRun, JsRuntimeHandle, JsValueRef,
-    _JsParseScriptAttributes_JsParseScriptAttributeNone,
+    JsConvertValueToNumber, JsConvertValueToString, JsCreateRuntime, JsDisposeRuntime, JsRun,
+    JsRuntimeHandle, JsValueRef, _JsParseScriptAttributes_JsParseScriptAttributeNone,
 };
 use std::mem::MaybeUninit;
 
@@ -101,6 +105,16 @@ impl JsResult {
 
         Ok(JsString { handle: result })
     }
+
+    pub fn to_js_number(&self) -> Result<JsNumber, JsError> {
+        let mut result = MaybeUninit::uninit();
+        let res = unsafe { JsConvertValueToNumber(self.handle, result.as_mut_ptr()) };
+        JsError::assert(res)?;
+
+        Ok(JsNumber {
+            handle: unsafe { result.assume_init() },
+        })
+    }
 }
 
 #[cfg(test)]
@@ -134,5 +148,29 @@ mod tests {
         let result = runtime.run_script(&script).unwrap();
         let s = result.to_js_string().unwrap().to_string().unwrap();
         assert_eq!(s, "hello world".to_string());
+    }
+
+    #[test]
+    fn run_script_with_int_result() {
+        let mut runtime = JsRuntime::new(JsRuntimeAttributes::None).unwrap();
+        let mut context = JsScriptContext::new(&mut runtime).unwrap();
+        context.set_current_context().unwrap();
+
+        let script = JsScript::new("test", "(() => { return 1024; })()").unwrap();
+        let result = runtime.run_script(&script).unwrap();
+        let res = result.to_js_number().unwrap().to_i32();
+        assert_eq!(res, Ok(1024));
+    }
+
+    #[test]
+    fn run_script_with_double_result() {
+        let mut runtime = JsRuntime::new(JsRuntimeAttributes::None).unwrap();
+        let mut context = JsScriptContext::new(&mut runtime).unwrap();
+        context.set_current_context().unwrap();
+
+        let script = JsScript::new("test", "(() => { return 1.23; })()").unwrap();
+        let result = runtime.run_script(&script).unwrap();
+        let res = result.to_js_number().unwrap().to_f64();
+        assert_eq!(res, Ok(1.23));
     }
 }
