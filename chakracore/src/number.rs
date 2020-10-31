@@ -3,6 +3,7 @@ use crate::value::JsValue;
 use chakracore_sys::{
     JsDoubleToNumber, JsIntToNumber, JsNumberToDouble, JsNumberToInt, JsValueRef,
 };
+use std::convert::TryFrom;
 use std::ptr;
 
 #[derive(Debug)]
@@ -11,16 +12,6 @@ pub struct JsNumber {
 }
 
 impl JsNumber {
-    /// Create a JsNumber from an i32
-    pub fn from_i32(val: i32) -> Result<Self, JsError> {
-        let mut result = ptr::null_mut();
-
-        let res = unsafe { JsIntToNumber(val, &mut result) };
-        JsError::assert(res)?;
-
-        Ok(Self { handle: result })
-    }
-
     /// Convert a JsNumber to an i32
     pub fn to_i32(&self) -> Result<i32, JsError> {
         let mut result = 0;
@@ -30,16 +21,6 @@ impl JsNumber {
         Ok(result)
     }
 
-    /// Create a JsNumber from a f64
-    pub fn from_f64(val: f64) -> Result<Self, JsError> {
-        let mut result = ptr::null_mut();
-
-        let res = unsafe { JsDoubleToNumber(val, &mut result) };
-        JsError::assert(res)?;
-
-        Ok(Self { handle: result })
-    }
-
     /// Convert a JsNumber to an f64
     pub fn to_f64(&self) -> Result<f64, JsError> {
         let mut result = 0f64;
@@ -47,6 +28,32 @@ impl JsNumber {
         JsError::assert(res)?;
 
         Ok(result)
+    }
+}
+
+impl TryFrom<i32> for JsNumber {
+    type Error = JsError;
+
+    fn try_from(value: i32) -> Result<Self, Self::Error> {
+        let mut result = ptr::null_mut();
+
+        let res = unsafe { JsIntToNumber(value, &mut result) };
+        JsError::assert(res)?;
+
+        Ok(Self { handle: result })
+    }
+}
+
+impl TryFrom<f64> for JsNumber {
+    type Error = JsError;
+
+    fn try_from(value: f64) -> Result<Self, Self::Error> {
+        let mut result = ptr::null_mut();
+
+        let res = unsafe { JsDoubleToNumber(value, &mut result) };
+        JsError::assert(res)?;
+
+        Ok(Self { handle: result })
     }
 }
 
@@ -72,25 +79,25 @@ mod tests {
 
     #[test]
     fn convert_from_int() {
-        let number = JsNumber::from_i32(42).unwrap();
+        let number = JsNumber::try_from(42).unwrap();
         assert!(!number.handle.is_null());
     }
 
     #[test]
     fn convert_to_int() {
-        let number = JsNumber::from_i32(42).unwrap();
+        let number = JsNumber::try_from(42).unwrap();
         assert_eq!(number.to_i32(), Ok(42));
     }
 
     #[test]
     fn convert_from_double() {
-        let number = JsNumber::from_f64(3.14).unwrap();
+        let number = JsNumber::try_from(3.14).unwrap();
         assert!(!number.handle.is_null());
     }
 
     #[test]
     fn convert_to_double() {
-        let number = JsNumber::from_f64(3.14).unwrap();
+        let number = JsNumber::try_from(3.14).unwrap();
         assert_eq!(number.to_f64(), Ok(3.14));
     }
 }

@@ -69,6 +69,7 @@ mod tests {
     use crate::context::JsScriptContext;
     use crate::number::JsNumber;
     use crate::runtime::{JsRuntime, JsRuntimeAttributes};
+    use std::convert::TryFrom;
 
     #[test]
     fn create_object() {
@@ -123,7 +124,7 @@ mod tests {
         context.set_current_context().unwrap();
 
         let mut global = JsObject::global().unwrap();
-        let pi = JsNumber::from_f64(std::f64::consts::PI).unwrap();
+        let pi = JsNumber::try_from(std::f64::consts::PI).unwrap();
         let pi_key = JsString::new("pi").unwrap();
         global.set_property(&pi_key, pi).unwrap();
 
