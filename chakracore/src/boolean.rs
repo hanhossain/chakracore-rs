@@ -1,23 +1,28 @@
 use crate::error::JsError;
 use chakracore_sys::{JsBoolToBoolean, JsBooleanToBool, JsValueRef};
+use std::convert::{TryFrom, TryInto};
 use std::ptr;
 
 pub struct JsBoolean {
     pub(crate) handle: JsValueRef,
 }
 
-impl JsBoolean {
-    /// Create JsBoolean from bool
-    pub fn from_bool(val: bool) -> Result<Self, JsError> {
+impl TryFrom<bool> for JsBoolean {
+    type Error = JsError;
+
+    fn try_from(value: bool) -> Result<Self, Self::Error> {
         let mut result = ptr::null_mut();
-        let res = unsafe { JsBoolToBoolean(val, &mut result) };
+        let res = unsafe { JsBoolToBoolean(value, &mut result) };
         JsError::assert(res)?;
 
         Ok(Self { handle: result })
     }
+}
 
-    /// Convert JsBoolean to bool
-    pub fn to_bool(&self) -> Result<bool, JsError> {
+impl TryInto<bool> for JsBoolean {
+    type Error = JsError;
+
+    fn try_into(self) -> Result<bool, Self::Error> {
         let mut result = false;
         let res = unsafe { JsBooleanToBool(self.handle, &mut result as *mut _) };
         JsError::assert(res)?;
@@ -39,7 +44,7 @@ mod tests {
         let mut context = JsScriptContext::new(&mut runtime).unwrap();
         context.set_current_context().unwrap();
 
-        let boolean = JsBoolean::from_bool(true).unwrap();
+        let boolean = JsBoolean::try_from(true).unwrap();
         assert!(!boolean.handle.is_null());
     }
 
@@ -49,7 +54,7 @@ mod tests {
         let mut context = JsScriptContext::new(&mut runtime).unwrap();
         context.set_current_context().unwrap();
 
-        let boolean = JsBoolean::from_bool(true).unwrap();
-        assert_eq!(boolean.to_bool(), Ok(true));
+        let boolean = JsBoolean::try_from(true).unwrap();
+        assert_eq!(boolean.try_into(), Ok(true));
     }
 }

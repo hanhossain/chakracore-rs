@@ -186,7 +186,7 @@ mod tests {
 
         let script = JsScript::new("test", "(() => { return true; })()").unwrap();
         let result = runtime.run_script(&script).unwrap();
-        let res = result.to_js_boolean().unwrap().to_bool();
+        let res = result.to_js_boolean().unwrap().try_into();
         assert_eq!(res, Ok(true));
     }
 }
