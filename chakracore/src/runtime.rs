@@ -124,6 +124,7 @@ impl JsResult {
 mod tests {
     use super::*;
     use crate::context::JsScriptContext;
+    use std::convert::TryInto;
 
     #[test]
     fn create_runtime() {
@@ -161,7 +162,7 @@ mod tests {
 
         let script = JsScript::new("test", "(() => { return 1024; })()").unwrap();
         let result = runtime.run_script(&script).unwrap();
-        let res = result.to_js_number().unwrap().to_i32();
+        let res = result.to_js_number().unwrap().try_into();
         assert_eq!(res, Ok(1024));
     }
 
@@ -173,7 +174,7 @@ mod tests {
 
         let script = JsScript::new("test", "(() => { return 1.23; })()").unwrap();
         let result = runtime.run_script(&script).unwrap();
-        let res = result.to_js_number().unwrap().to_f64();
+        let res = result.to_js_number().unwrap().try_into();
         assert_eq!(res, Ok(1.23));
     }
 

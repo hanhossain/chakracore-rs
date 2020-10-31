@@ -3,32 +3,12 @@ use crate::value::JsValue;
 use chakracore_sys::{
     JsDoubleToNumber, JsIntToNumber, JsNumberToDouble, JsNumberToInt, JsValueRef,
 };
-use std::convert::TryFrom;
+use std::convert::{TryFrom, TryInto};
 use std::ptr;
 
 #[derive(Debug)]
 pub struct JsNumber {
     pub(crate) handle: JsValueRef,
-}
-
-impl JsNumber {
-    /// Convert a JsNumber to an i32
-    pub fn to_i32(&self) -> Result<i32, JsError> {
-        let mut result = 0;
-        let res = unsafe { JsNumberToInt(self.handle, &mut result as *mut _) };
-        JsError::assert(res)?;
-
-        Ok(result)
-    }
-
-    /// Convert a JsNumber to an f64
-    pub fn to_f64(&self) -> Result<f64, JsError> {
-        let mut result = 0f64;
-        let res = unsafe { JsNumberToDouble(self.handle, &mut result as *mut _) };
-        JsError::assert(res)?;
-
-        Ok(result)
-    }
 }
 
 impl TryFrom<i32> for JsNumber {
@@ -54,6 +34,30 @@ impl TryFrom<f64> for JsNumber {
         JsError::assert(res)?;
 
         Ok(Self { handle: result })
+    }
+}
+
+impl TryInto<i32> for JsNumber {
+    type Error = JsError;
+
+    fn try_into(self) -> Result<i32, Self::Error> {
+        let mut result = 0;
+        let res = unsafe { JsNumberToInt(self.handle, &mut result as *mut _) };
+        JsError::assert(res)?;
+
+        Ok(result)
+    }
+}
+
+impl TryInto<f64> for JsNumber {
+    type Error = JsError;
+
+    fn try_into(self) -> Result<f64, Self::Error> {
+        let mut result = 0f64;
+        let res = unsafe { JsNumberToDouble(self.handle, &mut result as *mut _) };
+        JsError::assert(res)?;
+
+        Ok(result)
     }
 }
 
@@ -86,7 +90,7 @@ mod tests {
     #[test]
     fn convert_to_int() {
         let number = JsNumber::try_from(42).unwrap();
-        assert_eq!(number.to_i32(), Ok(42));
+        assert_eq!(number.try_into(), Ok(42));
     }
 
     #[test]
@@ -98,6 +102,6 @@ mod tests {
     #[test]
     fn convert_to_double() {
         let number = JsNumber::try_from(3.14).unwrap();
-        assert_eq!(number.to_f64(), Ok(3.14));
+        assert_eq!(number.try_into(), Ok(3.14));
     }
 }
