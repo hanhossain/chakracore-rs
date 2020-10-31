@@ -1,4 +1,5 @@
 use crate::error::JsError;
+use crate::value::JsValue;
 use chakracore_sys::{
     JsDoubleToNumber, JsIntToNumber, JsNumberToDouble, JsNumberToInt, JsValueRef,
 };
@@ -29,7 +30,7 @@ impl JsNumber {
         Ok(result)
     }
 
-    // Create a JsNumber from a f64
+    /// Create a JsNumber from a f64
     pub fn from_f64(val: f64) -> Result<Self, JsError> {
         let mut result = ptr::null_mut();
 
@@ -46,6 +47,22 @@ impl JsNumber {
         JsError::assert(res)?;
 
         Ok(result)
+    }
+}
+
+impl Into<JsValue> for JsNumber {
+    fn into(self) -> JsValue {
+        JsValue {
+            handle: self.handle,
+        }
+    }
+}
+
+impl Into<JsValue> for &JsNumber {
+    fn into(self) -> JsValue {
+        JsValue {
+            handle: self.handle,
+        }
     }
 }
 
