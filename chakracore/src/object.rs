@@ -1,9 +1,12 @@
+use crate::boolean::JsBoolean;
 use crate::error::JsError;
 use crate::string::JsString;
 use crate::value::JsValue;
 use chakracore_sys::{
-    JsCreateObject, JsGetGlobalObject, JsObjectHasProperty, JsObjectSetProperty, JsValueRef,
+    JsCreateObject, JsGetGlobalObject, JsObjectDeleteProperty, JsObjectGetProperty,
+    JsObjectHasProperty, JsObjectSetProperty, JsValueRef,
 };
+use std::convert::{TryFrom, TryInto};
 use std::ptr;
 
 #[derive(Debug)]
@@ -45,17 +48,24 @@ impl JsObject {
         let res = unsafe { JsObjectSetProperty(self.handle, key.handle, value.handle, true) };
         JsError::assert(res)
     }
-}
 
-impl Into<JsValue> for JsObject {
-    fn into(self) -> JsValue {
-        JsValue {
-            handle: self.handle,
-        }
+    pub fn get_property(&self, key: &JsString) -> Result<JsValue, JsError> {
+        let mut handle = ptr::null_mut();
+        let res = unsafe { JsObjectGetProperty(self.handle, key.handle, &mut handle) };
+        JsError::assert(res)?;
+
+        Ok(JsValue { handle })
+    }
+
+    pub fn delete_property(&self, key: &JsString) -> Result<bool, JsError> {
+        let mut handle = ptr::null_mut();
+        let res = unsafe { JsObjectDeleteProperty(self.handle, key.handle, true, &mut handle) };
+        JsError::assert(res)?;
+        JsBoolean::try_from(JsValue { handle })?.try_into()
     }
 }
 
-impl Into<JsValue> for &JsObject {
+impl Into<JsValue> for JsObject {
     fn into(self) -> JsValue {
         JsValue {
             handle: self.handle,
@@ -69,7 +79,7 @@ mod tests {
     use crate::context::JsScriptContext;
     use crate::number::JsNumber;
     use crate::runtime::{JsRuntime, JsRuntimeAttributes};
-    use std::convert::TryFrom;
+    use std::convert::{TryFrom, TryInto};
 
     #[test]
     fn create_object() {
@@ -112,13 +122,13 @@ mod tests {
         let mut global = JsObject::global().unwrap();
         let console = JsObject::new().unwrap();
         let console_key = JsString::new("console").unwrap();
-        global.set_property(&console_key, &console).unwrap();
+        global.set_property(&console_key, console).unwrap();
 
         assert!(global.has_property(&console_key).unwrap());
     }
 
     #[test]
-    fn set_property_number() {
+    fn get_property_number() {
         let mut runtime = JsRuntime::new(JsRuntimeAttributes::None).unwrap();
         let mut context = JsScriptContext::new(&mut runtime).unwrap();
         context.set_current_context().unwrap();
@@ -129,5 +139,26 @@ mod tests {
         global.set_property(&pi_key, pi).unwrap();
 
         assert!(global.has_property(&pi_key).unwrap());
+
+        let property: JsNumber = global.get_property(&pi_key).unwrap().try_into().unwrap();
+        assert_eq!(property.try_into(), Ok(std::f64::consts::PI));
+    }
+
+    #[test]
+    fn delete_property_string() {
+        let mut runtime = JsRuntime::new(JsRuntimeAttributes::None).unwrap();
+        let mut context = JsScriptContext::new(&mut runtime).unwrap();
+        context.set_current_context().unwrap();
+
+        let mut global = JsObject::global().unwrap();
+        let console = JsObject::new().unwrap();
+        let console_key = JsString::new("console").unwrap();
+        global.set_property(&console_key, console).unwrap();
+
+        assert!(global.has_property(&console_key).unwrap());
+
+        let result = global.delete_property(&console_key);
+        assert_eq!(result, Ok(true));
+        assert!(!global.has_property(&console_key).unwrap());
     }
 }
