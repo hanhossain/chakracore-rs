@@ -2,7 +2,7 @@ use crate::error::JsError;
 use chakracore_sys::{
     JsDoubleToNumber, JsIntToNumber, JsNumberToDouble, JsNumberToInt, JsValueRef,
 };
-use std::mem::MaybeUninit;
+use std::ptr;
 
 #[derive(Debug)]
 pub struct JsNumber {
@@ -12,14 +12,12 @@ pub struct JsNumber {
 impl JsNumber {
     /// Create a JsNumber from an i32
     pub fn from_i32(val: i32) -> Result<Self, JsError> {
-        let mut result = MaybeUninit::uninit();
+        let mut result = ptr::null_mut();
 
-        let res = unsafe { JsIntToNumber(val, result.as_mut_ptr()) };
+        let res = unsafe { JsIntToNumber(val, &mut result) };
         JsError::assert(res)?;
 
-        Ok(Self {
-            handle: unsafe { result.assume_init() },
-        })
+        Ok(Self { handle: result })
     }
 
     /// Convert a JsNumber to an i32
@@ -33,14 +31,12 @@ impl JsNumber {
 
     // Create a JsNumber from a f64
     pub fn from_f64(val: f64) -> Result<Self, JsError> {
-        let mut result = MaybeUninit::uninit();
+        let mut result = ptr::null_mut();
 
-        let res = unsafe { JsDoubleToNumber(val, result.as_mut_ptr()) };
+        let res = unsafe { JsDoubleToNumber(val, &mut result) };
         JsError::assert(res)?;
 
-        Ok(Self {
-            handle: unsafe { result.assume_init() },
-        })
+        Ok(Self { handle: result })
     }
 
     /// Convert a JsNumber to an f64

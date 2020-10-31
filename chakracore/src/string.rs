@@ -1,5 +1,4 @@
 use crate::error::JsError;
-use bitflags::_core::mem::MaybeUninit;
 use chakracore_sys::{JsCopyString, JsCreateString, JsValueRef};
 use std::convert::TryInto;
 use std::ffi::{CStr, CString};
@@ -15,19 +14,12 @@ impl JsString {
     pub fn new<T: Into<Vec<u8>>>(value: T) -> Result<Self, JsError> {
         let string = CString::new(value).unwrap();
 
-        let mut handle = MaybeUninit::uninit();
-        let res = unsafe {
-            JsCreateString(
-                string.as_ptr(),
-                string.as_bytes().len() as u64,
-                handle.as_mut_ptr(),
-            )
-        };
+        let mut handle = ptr::null_mut();
+        let res =
+            unsafe { JsCreateString(string.as_ptr(), string.as_bytes().len() as u64, &mut handle) };
         JsError::assert(res)?;
 
-        Ok(Self {
-            handle: unsafe { handle.assume_init() },
-        })
+        Ok(Self { handle })
     }
 
     /// Convert to a String

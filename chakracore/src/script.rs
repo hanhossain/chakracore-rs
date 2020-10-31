@@ -2,7 +2,6 @@ use crate::error::JsError;
 use crate::string::JsString;
 use chakracore_sys::{JsCreateExternalArrayBuffer, JsValueRef};
 use std::ffi::CString;
-use std::mem::MaybeUninit;
 use std::ptr;
 
 #[derive(Debug)]
@@ -22,7 +21,7 @@ impl JsScript {
         let script = CString::new(script).unwrap();
         let size = script.as_bytes().len();
         let script = script.into_raw();
-        let mut source = MaybeUninit::uninit();
+        let mut source = ptr::null_mut();
 
         let res = unsafe {
             JsCreateExternalArrayBuffer(
@@ -30,12 +29,11 @@ impl JsScript {
                 size as u32,
                 None,
                 ptr::null_mut(),
-                source.as_mut_ptr(),
+                &mut source,
             )
         };
 
         JsError::assert(res)?;
-        let source = unsafe { source.assume_init() };
 
         Ok(Self {
             handle: source,

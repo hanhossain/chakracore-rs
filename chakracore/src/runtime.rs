@@ -11,7 +11,7 @@ use chakracore_sys::{
     JsDisposeRuntime, JsRun, JsRuntimeHandle, JsValueRef,
     _JsParseScriptAttributes_JsParseScriptAttributeNone,
 };
-use std::mem::MaybeUninit;
+use std::ptr;
 
 bitflags! {
     pub struct JsRuntimeAttributes: u32 {
@@ -57,28 +57,25 @@ pub struct JsRuntime {
 impl JsRuntime {
     /// Create a new JsRuntime.
     pub fn new(attributes: JsRuntimeAttributes) -> Result<Self, JsError> {
-        let mut runtime: MaybeUninit<JsRuntimeHandle> = MaybeUninit::uninit();
-        let res = unsafe { JsCreateRuntime(attributes.bits, None, runtime.as_mut_ptr()) };
+        let mut runtime: JsRuntimeHandle = ptr::null_mut();
+        let res = unsafe { JsCreateRuntime(attributes.bits, None, &mut runtime) };
         JsError::assert(res)?;
 
-        Ok(Self {
-            handle: unsafe { runtime.assume_init() },
-        })
+        Ok(Self { handle: runtime })
     }
 
     pub fn run_script(&mut self, script: &JsScript) -> Result<JsResult, JsError> {
-        let mut result = MaybeUninit::uninit();
+        let mut result = ptr::null_mut();
         let res = unsafe {
             JsRun(
                 script.handle,
                 0usize,
                 script.source_url.handle,
                 _JsParseScriptAttributes_JsParseScriptAttributeNone,
-                result.as_mut_ptr(),
+                &mut result,
             )
         };
         JsError::assert(res)?;
-        let result = unsafe { result.assume_init() };
 
         Ok(JsResult { handle: result })
     }
@@ -99,32 +96,27 @@ pub struct JsResult {
 
 impl JsResult {
     pub fn to_js_string(&self) -> Result<JsString, JsError> {
-        let mut result = MaybeUninit::uninit();
-        let res = unsafe { JsConvertValueToString(self.handle, result.as_mut_ptr()) };
+        let mut result = ptr::null_mut();
+        let res = unsafe { JsConvertValueToString(self.handle, &mut result) };
         JsError::assert(res)?;
-        let result = unsafe { result.assume_init() };
 
         Ok(JsString { handle: result })
     }
 
     pub fn to_js_number(&self) -> Result<JsNumber, JsError> {
-        let mut result = MaybeUninit::uninit();
-        let res = unsafe { JsConvertValueToNumber(self.handle, result.as_mut_ptr()) };
+        let mut result = ptr::null_mut();
+        let res = unsafe { JsConvertValueToNumber(self.handle, &mut result) };
         JsError::assert(res)?;
 
-        Ok(JsNumber {
-            handle: unsafe { result.assume_init() },
-        })
+        Ok(JsNumber { handle: result })
     }
 
     pub fn to_js_boolean(&self) -> Result<JsBoolean, JsError> {
-        let mut result = MaybeUninit::uninit();
-        let res = unsafe { JsConvertValueToBoolean(self.handle, result.as_mut_ptr()) };
+        let mut result = ptr::null_mut();
+        let res = unsafe { JsConvertValueToBoolean(self.handle, &mut result) };
         JsError::assert(res)?;
 
-        Ok(JsBoolean {
-            handle: unsafe { result.assume_init() },
-        })
+        Ok(JsBoolean { handle: result })
     }
 }
 

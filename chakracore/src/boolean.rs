@@ -1,6 +1,6 @@
 use crate::error::JsError;
 use chakracore_sys::{JsBoolToBoolean, JsBooleanToBool, JsValueRef};
-use std::mem::MaybeUninit;
+use std::ptr;
 
 pub struct JsBoolean {
     pub(crate) handle: JsValueRef,
@@ -9,13 +9,11 @@ pub struct JsBoolean {
 impl JsBoolean {
     /// Create JsBoolean from bool
     pub fn from_bool(val: bool) -> Result<Self, JsError> {
-        let mut result = MaybeUninit::uninit();
-        let res = unsafe { JsBoolToBoolean(val, result.as_mut_ptr()) };
+        let mut result = ptr::null_mut();
+        let res = unsafe { JsBoolToBoolean(val, &mut result) };
         JsError::assert(res)?;
 
-        Ok(Self {
-            handle: unsafe { result.assume_init() },
-        })
+        Ok(Self { handle: result })
     }
 
     /// Convert JsBoolean to bool

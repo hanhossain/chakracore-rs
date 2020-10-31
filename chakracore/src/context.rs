@@ -1,7 +1,7 @@
 use crate::error::JsError;
 use crate::runtime::JsRuntime;
 use chakracore_sys::{JsContextRef, JsCreateContext, JsSetCurrentContext};
-use std::mem::MaybeUninit;
+use std::ptr;
 
 pub struct JsScriptContext {
     context: JsContextRef,
@@ -11,12 +11,12 @@ pub struct JsScriptContext {
 impl JsScriptContext {
     /// Create a script context
     pub fn new(runtime: &mut JsRuntime) -> Result<Self, JsError> {
-        let mut context: MaybeUninit<JsContextRef> = MaybeUninit::uninit();
-        let res = unsafe { JsCreateContext(runtime.handle, context.as_mut_ptr()) };
+        let mut context: JsContextRef = ptr::null_mut();
+        let res = unsafe { JsCreateContext(runtime.handle, &mut context) };
         JsError::assert(res)?;
 
         Ok(Self {
-            context: unsafe { context.assume_init() },
+            context,
             is_current_context: false,
         })
     }

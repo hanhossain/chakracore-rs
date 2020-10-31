@@ -9,7 +9,6 @@ mod tests {
     use super::*;
     use std::convert::TryInto;
     use std::ffi::{CStr, CString};
-    use std::mem::MaybeUninit;
     use std::ptr;
 
     fn assert_no_error(error_code: _JsErrorCode) {
@@ -22,61 +21,55 @@ mod tests {
         let script_c = CString::new(script).unwrap().into_raw();
 
         unsafe {
-            let mut runtime: MaybeUninit<JsRuntimeHandle> = MaybeUninit::uninit();
-            let mut context: MaybeUninit<JsContextRef> = MaybeUninit::uninit();
+            let mut runtime: JsRuntimeHandle = ptr::null_mut();
+            let mut context: JsContextRef = ptr::null_mut();
 
             // Create a runtime.
             let res = JsCreateRuntime(
                 _JsRuntimeAttributes_JsRuntimeAttributeNone,
                 None,
-                runtime.as_mut_ptr(),
+                &mut runtime,
             );
             assert_no_error(res);
-            let runtime = runtime.assume_init();
 
             // Create an execution context.
-            let res = JsCreateContext(runtime, context.as_mut_ptr());
+            let res = JsCreateContext(runtime, &mut context);
             assert_no_error(res);
-            let context = context.assume_init();
 
             // Now set the current execution context.
             let res = JsSetCurrentContext(context);
             assert_no_error(res);
 
-            let mut fname = MaybeUninit::uninit();
+            let mut fname = ptr::null_mut();
             let sample = CString::new("sample").unwrap();
-            let res = JsCreateString(sample.as_ptr(), 6, fname.as_mut_ptr());
+            let res = JsCreateString(sample.as_ptr(), 6, &mut fname);
             assert_no_error(res);
-            let fname = fname.assume_init();
 
-            let mut script_source = MaybeUninit::uninit();
+            let mut script_source = ptr::null_mut();
             let res = JsCreateExternalArrayBuffer(
                 script_c as *mut _,
                 script.len() as u32,
                 None,
                 ptr::null_mut(),
-                script_source.as_mut_ptr(),
+                &mut script_source,
             );
             assert_no_error(res);
-            let script_source = script_source.assume_init();
 
             // run the script
-            let mut result = MaybeUninit::uninit();
+            let mut result = ptr::null_mut();
             let res = JsRun(
                 script_source as *mut _,
                 0usize,
                 fname as *mut _,
                 _JsParseScriptAttributes_JsParseScriptAttributeNone,
-                result.as_mut_ptr(),
+                &mut result,
             );
             assert_no_error(res);
-            let result = result.assume_init();
 
             // Convert your script result to String in JavaScript; redundant if your script returns a String
-            let mut resultJSString = MaybeUninit::uninit();
-            let res = JsConvertValueToString(result as *mut _, resultJSString.as_mut_ptr());
+            let mut resultJSString = ptr::null_mut();
+            let res = JsConvertValueToString(result as *mut _, &mut resultJSString);
             assert_no_error(res);
-            let resultJSString = resultJSString.assume_init();
 
             // get size of buffer
             let mut length = 0;
