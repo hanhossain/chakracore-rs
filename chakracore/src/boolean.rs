@@ -1,5 +1,6 @@
 use crate::error::JsError;
-use chakracore_sys::{JsBoolToBoolean, JsBooleanToBool, JsValueRef};
+use crate::value::JsValue;
+use chakracore_sys::{JsBoolToBoolean, JsBooleanToBool, JsConvertValueToBoolean, JsValueRef};
 use std::convert::{TryFrom, TryInto};
 use std::ptr;
 
@@ -28,6 +29,26 @@ impl TryInto<bool> for JsBoolean {
         JsError::assert(res)?;
 
         Ok(result)
+    }
+}
+
+impl TryFrom<JsValue> for JsBoolean {
+    type Error = JsError;
+
+    fn try_from(value: JsValue) -> Result<Self, Self::Error> {
+        let mut result = ptr::null_mut();
+        let res = unsafe { JsConvertValueToBoolean(value.handle, &mut result) };
+        JsError::assert(res)?;
+
+        Ok(JsBoolean { handle: result })
+    }
+}
+
+impl Into<JsValue> for JsBoolean {
+    fn into(self) -> JsValue {
+        JsValue {
+            handle: self.handle,
+        }
     }
 }
 

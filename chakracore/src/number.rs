@@ -1,7 +1,8 @@
 use crate::error::JsError;
 use crate::value::JsValue;
 use chakracore_sys::{
-    JsDoubleToNumber, JsIntToNumber, JsNumberToDouble, JsNumberToInt, JsValueRef,
+    JsConvertValueToNumber, JsDoubleToNumber, JsIntToNumber, JsNumberToDouble, JsNumberToInt,
+    JsValueRef,
 };
 use std::convert::{TryFrom, TryInto};
 use std::ptr;
@@ -37,6 +38,18 @@ impl TryFrom<f64> for JsNumber {
     }
 }
 
+impl TryFrom<JsValue> for JsNumber {
+    type Error = JsError;
+
+    fn try_from(value: JsValue) -> Result<Self, Self::Error> {
+        let mut result = ptr::null_mut();
+        let res = unsafe { JsConvertValueToNumber(value.handle, &mut result) };
+        JsError::assert(res)?;
+
+        Ok(JsNumber { handle: result })
+    }
+}
+
 impl TryInto<i32> for JsNumber {
     type Error = JsError;
 
@@ -62,14 +75,6 @@ impl TryInto<f64> for JsNumber {
 }
 
 impl Into<JsValue> for JsNumber {
-    fn into(self) -> JsValue {
-        JsValue {
-            handle: self.handle,
-        }
-    }
-}
-
-impl Into<JsValue> for &JsNumber {
     fn into(self) -> JsValue {
         JsValue {
             handle: self.handle,

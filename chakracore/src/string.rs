@@ -1,6 +1,7 @@
 use crate::error::JsError;
-use chakracore_sys::{JsCopyString, JsCreateString, JsValueRef};
-use std::convert::TryInto;
+use crate::value::JsValue;
+use chakracore_sys::{JsConvertValueToString, JsCopyString, JsCreateString, JsValueRef};
+use std::convert::{TryFrom, TryInto};
 use std::ffi::{CStr, CString};
 use std::ptr;
 
@@ -44,6 +45,26 @@ impl JsString {
 
         let result_str = CStr::from_bytes_with_nul(buffer.as_slice()).unwrap();
         Ok(result_str.to_owned().into_string().unwrap())
+    }
+}
+
+impl TryFrom<JsValue> for JsString {
+    type Error = JsError;
+
+    fn try_from(value: JsValue) -> Result<Self, Self::Error> {
+        let mut result = ptr::null_mut();
+        let res = unsafe { JsConvertValueToString(value.handle, &mut result) };
+        JsError::assert(res)?;
+
+        Ok(JsString { handle: result })
+    }
+}
+
+impl Into<JsValue> for JsString {
+    fn into(self) -> JsValue {
+        JsValue {
+            handle: self.handle,
+        }
     }
 }
 

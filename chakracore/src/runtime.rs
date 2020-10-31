@@ -1,14 +1,12 @@
 // TODO: maybe convert all bitflags to upper snake case
 #![allow(non_upper_case_globals)]
 
-use crate::number::JsNumber;
+use crate::error::JsError;
 use crate::script::JsScript;
-use crate::string::JsString;
-use crate::{boolean::JsBoolean, error::JsError};
+use crate::value::JsValue;
 use bitflags::bitflags;
 use chakracore_sys::{
-    JsConvertValueToBoolean, JsConvertValueToNumber, JsConvertValueToString, JsCreateRuntime,
-    JsDisposeRuntime, JsRun, JsRuntimeHandle, JsValueRef,
+    JsCreateRuntime, JsDisposeRuntime, JsRun, JsRuntimeHandle,
     _JsParseScriptAttributes_JsParseScriptAttributeNone,
 };
 use std::ptr;
@@ -64,7 +62,7 @@ impl JsRuntime {
         Ok(Self { handle: runtime })
     }
 
-    pub fn run_script(&mut self, script: &JsScript) -> Result<JsResult, JsError> {
+    pub fn run_script(&mut self, script: &JsScript) -> Result<JsValue, JsError> {
         let mut result = ptr::null_mut();
         let res = unsafe {
             JsRun(
@@ -77,7 +75,7 @@ impl JsRuntime {
         };
         JsError::assert(res)?;
 
-        Ok(JsResult { handle: result })
+        Ok(JsValue { handle: result })
     }
 }
 
@@ -90,41 +88,14 @@ impl Drop for JsRuntime {
     }
 }
 
-pub struct JsResult {
-    handle: JsValueRef,
-}
-
-impl JsResult {
-    pub fn to_js_string(&self) -> Result<JsString, JsError> {
-        let mut result = ptr::null_mut();
-        let res = unsafe { JsConvertValueToString(self.handle, &mut result) };
-        JsError::assert(res)?;
-
-        Ok(JsString { handle: result })
-    }
-
-    pub fn to_js_number(&self) -> Result<JsNumber, JsError> {
-        let mut result = ptr::null_mut();
-        let res = unsafe { JsConvertValueToNumber(self.handle, &mut result) };
-        JsError::assert(res)?;
-
-        Ok(JsNumber { handle: result })
-    }
-
-    pub fn to_js_boolean(&self) -> Result<JsBoolean, JsError> {
-        let mut result = ptr::null_mut();
-        let res = unsafe { JsConvertValueToBoolean(self.handle, &mut result) };
-        JsError::assert(res)?;
-
-        Ok(JsBoolean { handle: result })
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::boolean::JsBoolean;
     use crate::context::JsScriptContext;
-    use std::convert::TryInto;
+    use crate::number::JsNumber;
+    use crate::string::JsString;
+    use std::convert::{TryFrom, TryInto};
 
     #[test]
     fn create_runtime() {
@@ -150,8 +121,8 @@ mod tests {
 
         let script = JsScript::new("test", "(() => { return 'hello world'; })()").unwrap();
         let result = runtime.run_script(&script).unwrap();
-        let s = result.to_js_string().unwrap().to_string().unwrap();
-        assert_eq!(s, "hello world".to_string());
+        let s = JsString::try_from(result).unwrap();
+        assert_eq!(s.to_string().unwrap(), "hello world".to_string());
     }
 
     #[test]
@@ -162,7 +133,7 @@ mod tests {
 
         let script = JsScript::new("test", "(() => { return 1024; })()").unwrap();
         let result = runtime.run_script(&script).unwrap();
-        let res = result.to_js_number().unwrap().try_into();
+        let res = JsNumber::try_from(result).unwrap().try_into();
         assert_eq!(res, Ok(1024));
     }
 
@@ -174,7 +145,7 @@ mod tests {
 
         let script = JsScript::new("test", "(() => { return 1.23; })()").unwrap();
         let result = runtime.run_script(&script).unwrap();
-        let res = result.to_js_number().unwrap().try_into();
+        let res = JsNumber::try_from(result).unwrap().try_into();
         assert_eq!(res, Ok(1.23));
     }
 
@@ -186,7 +157,7 @@ mod tests {
 
         let script = JsScript::new("test", "(() => { return true; })()").unwrap();
         let result = runtime.run_script(&script).unwrap();
-        let res = result.to_js_boolean().unwrap().try_into();
+        let res = JsBoolean::try_from(result).unwrap().try_into();
         assert_eq!(res, Ok(true));
     }
 }
