@@ -12,7 +12,7 @@ mod tests {
     use std::os::raw::c_ushort;
     use std::ptr;
 
-    static mut DONE: bool = false;
+    static mut BASIC_LOGGING_DONE: bool = false;
 
     fn assert_no_error(error_code: _JsErrorCode) {
         assert_eq!(error_code, _JsErrorCode_JsNoError);
@@ -113,7 +113,7 @@ mod tests {
         _argumentCount: c_ushort,
         _callbackState: *mut c_void,
     ) -> JsValueRef {
-        DONE = true;
+        BASIC_LOGGING_DONE = true;
         ptr::null_mut()
     }
 
@@ -207,7 +207,7 @@ mod tests {
             let res = JsDisposeRuntime(runtime);
             assert_no_error(res);
 
-            assert!(DONE);
+            assert!(BASIC_LOGGING_DONE);
         }
     }
 }
