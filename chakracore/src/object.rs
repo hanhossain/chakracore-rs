@@ -1,5 +1,6 @@
 use crate::error::JsError;
-use chakracore_sys::{JsCreateObject, JsGetGlobalObject, JsValueRef};
+use crate::string::JsString;
+use chakracore_sys::{JsCreateObject, JsGetGlobalObject, JsObjectHasProperty, JsValueRef};
 use std::ptr;
 
 #[derive(Debug)]
@@ -22,6 +23,14 @@ impl JsObject {
         JsError::assert(res)?;
 
         Ok(Self { handle: result })
+    }
+
+    pub fn has_property(&self, key: &JsString) -> Result<bool, JsError> {
+        let mut result = false;
+        let res = unsafe { JsObjectHasProperty(self.handle, key.handle, &mut result) };
+        JsError::assert(res)?;
+
+        Ok(result)
     }
 }
 
@@ -49,5 +58,17 @@ mod tests {
 
         let object = JsObject::global().unwrap();
         assert!(!object.handle.is_null());
+    }
+
+    #[test]
+    fn has_property_string() {
+        let mut runtime = JsRuntime::new(JsRuntimeAttributes::None).unwrap();
+        let mut context = JsScriptContext::new(&mut runtime).unwrap();
+        context.set_current_context().unwrap();
+
+        let object = JsObject::global().unwrap();
+        assert!(!object
+            .has_property(&JsString::new("hello").unwrap())
+            .unwrap());
     }
 }
