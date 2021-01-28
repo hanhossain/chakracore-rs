@@ -1,4 +1,8 @@
 # chakracore-rs: Things to port
+Targets release `v1.11.24`.
+
+## Important Todos:
+- [ ] A nice way to add functions to an object (like `console.log('hello world')`)
 
 ## JSRT Typedef References:
 
@@ -42,7 +46,7 @@
 - [ ] JsParseScriptAttributes
 - [ ] JsPromiseState
 - [ ] JsPropertyIdType
-- [ ] JsRuntimeAttributes
+- [x] JsRuntimeAttributes
 - [ ] JsTypedArrayType
 - [ ] JsValueType
 
