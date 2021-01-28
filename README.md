@@ -35,7 +35,7 @@
 
 ## JSRT Enum References:
 
-- [ ] JsErrorCode
+- [x] JsErrorCode
 - [ ] JsMemoryEventType
 - [ ] JsModuleHostInfoKind
 - [ ] JsParseModuleSourceFlags
@@ -50,38 +50,38 @@
 ## JSRT API References:
 
 - [ ] JsAddRef
-- [ ] JsBoolToBoolean
-- [ ] JsBooleanToBool
+- [x] JsBoolToBoolean
+- [x] JsBooleanToBool
 - [ ] JsCallFunction
 - [ ] JsCollectGarbage
 - [ ] JsConstructObject
-- [ ] JsConvertValueToBoolean
-- [ ] JsConvertValueToNumber
+- [x] JsConvertValueToBoolean
+- [x] JsConvertValueToNumber
 - [ ] JsConvertValueToObject
-- [ ] JsConvertValueToString
-- [ ] JsCopyString
+- [x] JsConvertValueToString
+- [x] JsCopyString
 - [ ] JsCopyStringOneByte
 - [ ] JsCopyStringUtf16
 - [ ] JsCopyPropertyId
 - [ ] JsCreateArray
 - [ ] JsCreateArrayBuffer
-- [ ] JsCreateContext
+- [x] JsCreateContext
 - [ ] JsCreateDataView
 - [ ] JsCreateEnhancedFunction
 - [ ] JsCreateError
-- [ ] JsCreateExternalArrayBuffer
+- [x] JsCreateExternalArrayBuffer
 - [ ] JsCreateExternalObject
 - [ ] JsCreateExternalObjectWithPrototype
 - [ ] JsCreateFunction
 - [ ] JsCreateNamedFunction
-- [ ] JsCreateObject
+- [x] JsCreateObject
 - [ ] JsCreatePromise
 - [ ] JsCreatePropertyId
 - [ ] JsCreateRangeError
 - [ ] JsCreateReferenceError
-- [ ] JsCreateRuntime
+- [x] JsCreateRuntime
 - [ ] JsCreateSharedArrayBufferWithSharedContent
-- [ ] JsCreateString
+- [x] JsCreateString
 - [ ] JsCreateStringUtf16
 - [ ] JsCreateSymbol
 - [ ] JsCreateSyntaxError
@@ -93,8 +93,8 @@
 - [ ] JsDeleteIndexedProperty
 - [ ] JsDeleteProperty
 - [ ] JsDisableRuntimeExecution
-- [ ] JsDisposeRuntime
-- [ ] JsDoubleToNumber
+- [x] JsDisposeRuntime
+- [x] JsDoubleToNumber
 - [ ] JsEnableRuntimeExecution
 - [ ] JsEquals
 - [ ] JsGetAndClearException
@@ -108,7 +108,7 @@
 - [ ] JsGetExtensionAllowed
 - [ ] JsGetExternalData
 - [ ] JsGetFalseValue
-- [ ] JsGetGlobalObject
+- [x] JsGetGlobalObject
 - [ ] JsGetIndexedPropertiesExternalData
 - [ ] JsGetIndexedProperty
 - [ ] JsGetModuleHostInfo
@@ -147,20 +147,20 @@
 - [ ] JsIdle
 - [ ] JsInitializeModuleRecord
 - [ ] JsInstanceOf
-- [ ] JsIntToNumber
+- [x] JsIntToNumber
 - [ ] JsIsRuntimeExecutionDisabled
 - [ ] JsLessThan
 - [ ] JsLessThanOrEqual
 - [ ] JsModuleEvaluation
 - [ ] JsObjectDefineProperty
-- [ ] JsObjectDeleteProperty
+- [x] JsObjectDeleteProperty
 - [ ] JsObjectGetOwnPropertyDescriptor
-- [ ] JsObjectGetProperty
+- [x] JsObjectGetProperty
 - [ ] JsObjectHasOwnProperty
-- [ ] JsObjectHasProperty
-- [ ] JsObjectSetProperty
-- [ ] JsNumberToDouble
-- [ ] JsNumberToInt
+- [x] JsObjectHasProperty
+- [x] JsObjectSetProperty
+- [x] JsNumberToDouble
+- [x] JsNumberToInt
 - [ ] JsParse
 - [ ] JsParseModuleSource
 - [ ] JsParseSerialized
@@ -172,7 +172,7 @@
 - [ ] JsPreventExtension
 - [ ] JsRelease
 - [ ] JsReleaseSharedArrayBufferContentHandle
-- [ ] JsRun
+- [x] JsRun
 - [ ] JsRunScript
 - [ ] JsRunScriptWithParserState
 - [ ] JsRunSerialized
@@ -182,7 +182,7 @@
 - [ ] JsSerializeParserState
 - [ ] JsSerializeScript
 - [ ] JsSetContextData
-- [ ] JsSetCurrentContext
+- [x] JsSetCurrentContext
 - [ ] JsSetException
 - [ ] JsSetExternalData
 - [ ] JsSetHostPromiseRejectionTracker
