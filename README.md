@@ -1,5 +1,7 @@
-# chakracore-rs: Things to port
+# chakracore-rs
 Targets release `v1.11.24`.
+
+See [JSRT Reference](https://github.com/chakra-core/ChakraCore/wiki/JavaScript-Runtime-%28JSRT%29-Reference) for the raw API.
 
 ## Important Todos:
 - [ ] A nice way to add functions to an object (like `console.log('hello world')`)
