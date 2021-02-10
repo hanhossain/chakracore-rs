@@ -12,8 +12,7 @@ unsafe extern "C" fn handler(
     _argument_count: c_ushort,
     callback_state: *mut c_void,
 ) -> JsValueRef {
-    // todo: null check
-    let closure: &mut Box<dyn Fn()> = std::mem::transmute(callback_state);
+    let closure: &mut Box<dyn FnMut()> = std::mem::transmute(callback_state);
     closure();
 
     ptr::null_mut()
@@ -25,7 +24,7 @@ pub struct JsFunction {
 }
 
 impl JsFunction {
-    pub fn new(callback: Box<dyn Fn()>) -> Result<Self, JsError> {
+    pub fn new<'a>(callback: Box<dyn FnMut() + 'a>) -> Result<Self, JsError> {
         let callback = Box::new(callback);
 
         // TODO: don't forget to drop this later
@@ -56,19 +55,15 @@ mod tests {
     use crate::script::JsScript;
     use crate::string::JsString;
 
-    static mut BASIC_FUNCTION_DONE: bool = false;
-
     #[test]
     fn create_basic_function() {
+        let mut basic_function_done = false;
+
         let mut runtime = JsRuntime::new(JsRuntimeAttributes::None).unwrap();
         let mut context = JsScriptContext::new(&mut runtime).unwrap();
         context.set_current_context().unwrap();
 
-        fn custom_handler() {
-            unsafe {
-                BASIC_FUNCTION_DONE = true;
-            }
-        }
+        let custom_handler = || basic_function_done = true;
 
         let hello_world = JsFunction::new(Box::new(custom_handler)).unwrap();
         let key = JsString::new("helloWorld").unwrap();
@@ -79,8 +74,6 @@ mod tests {
         let script = JsScript::new("test", "helloWorld()").unwrap();
         runtime.run_script(&script).unwrap();
 
-        unsafe {
-            assert!(BASIC_FUNCTION_DONE);
-        }
+        assert!(basic_function_done);
     }
 }
