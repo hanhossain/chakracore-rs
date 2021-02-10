@@ -1,6 +1,7 @@
 pub mod boolean;
 pub mod context;
 pub mod error;
+pub mod function;
 pub mod number;
 pub mod object;
 pub mod runtime;
