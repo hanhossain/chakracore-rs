@@ -142,7 +142,7 @@ See [JSRT Reference](https://github.com/chakra-core/ChakraCore/wiki/JavaScript-R
 - [ ] JsGetTypedArrayInfo
 - [ ] JsGetTypedArrayStorage
 - [ ] JsGetUndefinedValue
-- [ ] JsGetValueType
+- [x] JsGetValueType
 - [ ] JsGetWeakReferenceValue
 - [ ] JsHasException
 - [ ] JsHasExternalData
