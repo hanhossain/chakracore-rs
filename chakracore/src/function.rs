@@ -9,13 +9,18 @@ unsafe extern "C" fn handler(
     _callee: JsValueRef,
     _is_construct_call: bool,
     _arguments: *mut JsValueRef,
-    _argument_count: c_ushort,
+    argument_count: c_ushort,
     callback_state: *mut c_void,
 ) -> JsValueRef {
-    let closure: &mut Box<dyn FnMut()> = std::mem::transmute(callback_state);
-    closure();
+    let context = JsFunctionContext { argument_count };
+    let closure: &mut Box<dyn FnMut(JsFunctionContext)> = std::mem::transmute(callback_state);
+    closure(context);
 
     ptr::null_mut()
+}
+
+pub struct JsFunctionContext {
+    pub argument_count: u16,
 }
 
 #[derive(Debug)]
@@ -24,7 +29,7 @@ pub struct JsFunction {
 }
 
 impl JsFunction {
-    pub fn new<'a>(callback: Box<dyn FnMut() + 'a>) -> Result<Self, JsError> {
+    pub fn new<'a>(callback: Box<dyn FnMut(JsFunctionContext) + 'a>) -> Result<Self, JsError> {
         let callback = Box::new(callback);
 
         // TODO: don't forget to drop this later
@@ -56,14 +61,14 @@ mod tests {
     use crate::string::JsString;
 
     #[test]
-    fn create_basic_function() {
-        let mut basic_function_done = false;
+    fn create_function() {
+        let mut succeeded = false;
 
         let mut runtime = JsRuntime::new(JsRuntimeAttributes::None).unwrap();
         let mut context = JsScriptContext::new(&mut runtime).unwrap();
         context.set_current_context().unwrap();
 
-        let custom_handler = || basic_function_done = true;
+        let custom_handler = |_| succeeded = true;
 
         let hello_world = JsFunction::new(Box::new(custom_handler)).unwrap();
         let key = JsString::new("helloWorld").unwrap();
@@ -74,6 +79,27 @@ mod tests {
         let script = JsScript::new("test", "helloWorld()").unwrap();
         runtime.run_script(&script).unwrap();
 
-        assert!(basic_function_done);
+        assert!(succeeded);
+    }
+
+    #[test]
+    fn create_function_with_parameters() {
+        let mut runtime = JsRuntime::new(JsRuntimeAttributes::None).unwrap();
+        let mut context = JsScriptContext::new(&mut runtime).unwrap();
+        context.set_current_context().unwrap();
+
+        let mut argument_count = 0;
+        let custom_handler = |c: JsFunctionContext| argument_count = c.argument_count;
+
+        let hello_world = JsFunction::new(Box::new(custom_handler)).unwrap();
+        let key = JsString::new("helloWorld").unwrap();
+
+        let mut global = JsObject::global().unwrap();
+        global.set_property(&key, hello_world).unwrap();
+
+        let script = JsScript::new("test", "helloWorld(1, 2, 3, 4)").unwrap();
+        runtime.run_script(&script).unwrap();
+
+        assert_eq!(argument_count, 5);
     }
 }
