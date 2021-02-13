@@ -6,13 +6,24 @@ use std::os::raw::c_ushort;
 use std::ptr;
 
 unsafe extern "C" fn handler(
-    _callee: JsValueRef,
-    _is_construct_call: bool,
-    _arguments: *mut JsValueRef,
+    _callee: JsValueRef, // TODO: what should we do with the callee?
+    is_construct_call: bool,
+    arguments: *mut JsValueRef,
     argument_count: c_ushort,
     callback_state: *mut c_void,
 ) -> JsValueRef {
-    let context = JsFunctionContext { argument_count };
+    let mut args = Vec::new();
+    for i in 0..argument_count as usize {
+        args.push(JsValue {
+            handle: arguments.add(i).read() as *mut _,
+        });
+    }
+
+    let context = JsFunctionContext {
+        argument_count,
+        arguments: args,
+        is_construct_call,
+    };
     let closure = &mut *(callback_state as *mut Box<dyn FnMut(JsFunctionContext)>);
     closure(context);
 
@@ -21,6 +32,8 @@ unsafe extern "C" fn handler(
 
 pub struct JsFunctionContext {
     pub argument_count: u16,
+    pub arguments: Vec<JsValue>,
+    pub is_construct_call: bool,
 }
 
 #[derive(Debug)]
@@ -59,6 +72,7 @@ mod tests {
     use crate::runtime::{JsRuntime, JsRuntimeAttributes};
     use crate::script::JsScript;
     use crate::string::JsString;
+    use crate::value::JsType;
 
     #[test]
     fn create_function() {
@@ -89,7 +103,16 @@ mod tests {
         context.set_current_context().unwrap();
 
         let mut argument_count = 0;
-        let custom_handler = |c: JsFunctionContext| argument_count = c.argument_count;
+        let mut argument_types = Vec::new();
+        let mut is_construct_call = true;
+
+        // TODO: need to assert the arguments are correct
+        // TODO: will require messing with the Js models though
+        let custom_handler = |c: JsFunctionContext| {
+            argument_count = c.argument_count;
+            argument_types = c.arguments.iter().map(|x| x.get_type()).collect();
+            is_construct_call = c.is_construct_call;
+        };
 
         let hello_world = JsFunction::new(Box::new(custom_handler)).unwrap();
         let key = JsString::new("helloWorld").unwrap();
@@ -101,5 +124,16 @@ mod tests {
         runtime.run_script(&script).unwrap();
 
         assert_eq!(argument_count, 5);
+        assert_eq!(
+            argument_types,
+            vec![
+                Ok(JsType::JsUndefined),
+                Ok(JsType::JsNumber),
+                Ok(JsType::JsNumber),
+                Ok(JsType::JsNumber),
+                Ok(JsType::JsNumber),
+            ]
+        );
+        assert!(!is_construct_call);
     }
 }
