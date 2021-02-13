@@ -13,6 +13,7 @@ pub struct JsScript {
 }
 
 impl JsScript {
+    #[allow(clippy::cast_possible_truncation)]
     /// Convert a string into a script
     pub fn new<TUrl: Into<Vec<u8>>, TScript: Into<Vec<u8>>>(
         url: TUrl,
@@ -48,7 +49,7 @@ impl Drop for JsScript {
     fn drop(&mut self) {
         // release script from memory
         unsafe {
-            let _ = CString::from_raw(self.raw);
+            std::mem::drop(CString::from_raw(self.raw));
         }
     }
 }

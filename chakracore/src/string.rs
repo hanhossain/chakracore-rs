@@ -11,7 +11,7 @@ pub struct JsString {
 }
 
 impl JsString {
-    /// Create a JsString
+    /// Create a `JsString`
     pub fn new<T: Into<Vec<u8>>>(value: T) -> Result<Self, JsError> {
         let string = CString::new(value).unwrap();
 
@@ -27,8 +27,7 @@ impl JsString {
     pub fn to_string(&self) -> Result<String, JsError> {
         // get size of buffer
         let mut length = 0;
-        let res = unsafe { JsCopyString(self.handle, ptr::null_mut(), 0, &mut length) };
-        JsError::assert(res)?;
+        JsError::assert(unsafe { JsCopyString(self.handle, ptr::null_mut(), 0, &mut length) })?;
 
         // copy to buffer
         let total_length = length + 1;

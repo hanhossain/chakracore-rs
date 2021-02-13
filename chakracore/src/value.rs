@@ -3,19 +3,19 @@ use chakracore_sys::{JsGetValueType, JsValueRef};
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum JsType {
-    JsUndefined,
-    JsNull,
-    JsNumber,
-    JsString,
-    JsBoolean,
-    JsObject,
-    JsFunction,
-    JsError,
-    JsArray,
-    JsSymbol,
-    JsArrayBuffer,
-    JsTypedArray,
-    JsDataView,
+    Undefined,
+    Null,
+    Number,
+    String,
+    Boolean,
+    Object,
+    Function,
+    Error,
+    Array,
+    Symbol,
+    ArrayBuffer,
+    TypedArray,
+    DataView,
 }
 
 pub struct JsValue {
@@ -24,24 +24,24 @@ pub struct JsValue {
 
 impl JsValue {
     pub fn get_type(&self) -> Result<JsType, JsError> {
-        let mut result = 0u32;
+        let mut result = 0_u32;
         let res = unsafe { JsGetValueType(self.handle, &mut result) };
         JsError::assert(res)?;
 
         Ok(match result {
-            0 => JsType::JsUndefined,
-            1 => JsType::JsNull,
-            2 => JsType::JsNumber,
-            3 => JsType::JsString,
-            4 => JsType::JsBoolean,
-            5 => JsType::JsObject,
-            6 => JsType::JsFunction,
-            7 => JsType::JsError,
-            8 => JsType::JsArray,
-            9 => JsType::JsSymbol,
-            10 => JsType::JsArrayBuffer,
-            11 => JsType::JsTypedArray,
-            12 => JsType::JsDataView,
+            0 => JsType::Undefined,
+            1 => JsType::Null,
+            2 => JsType::Number,
+            3 => JsType::String,
+            4 => JsType::Boolean,
+            5 => JsType::Object,
+            6 => JsType::Function,
+            7 => JsType::Error,
+            8 => JsType::Array,
+            9 => JsType::Symbol,
+            10 => JsType::ArrayBuffer,
+            11 => JsType::TypedArray,
+            12 => JsType::DataView,
             _ => unreachable!(),
         })
     }
@@ -60,7 +60,7 @@ mod tests {
     fn get_type_number() {
         let number = JsNumber::try_from(42).unwrap();
         let value: JsValue = number.into();
-        assert_eq!(value.get_type(), Ok(JsType::JsNumber));
+        assert_eq!(value.get_type(), Ok(JsType::Number));
     }
 
     #[test]
@@ -71,6 +71,6 @@ mod tests {
 
         let bool = JsBoolean::try_from(true).unwrap();
         let value: JsValue = bool.into();
-        assert_eq!(value.get_type(), Ok(JsType::JsBoolean));
+        assert_eq!(value.get_type(), Ok(JsType::Boolean));
     }
 }

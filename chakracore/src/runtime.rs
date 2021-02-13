@@ -53,7 +53,7 @@ pub struct JsRuntime {
 }
 
 impl JsRuntime {
-    /// Create a new JsRuntime.
+    /// Create a new `JsRuntime`
     pub fn new(attributes: JsRuntimeAttributes) -> Result<Self, JsError> {
         let mut runtime: JsRuntimeHandle = ptr::null_mut();
         let res = unsafe { JsCreateRuntime(attributes.bits, None, &mut runtime) };
@@ -62,12 +62,13 @@ impl JsRuntime {
         Ok(Self { handle: runtime })
     }
 
+    #[allow(clippy::unused_self)]
     pub fn run_script(&mut self, script: &JsScript) -> Result<JsValue, JsError> {
         let mut result = ptr::null_mut();
         let res = unsafe {
             JsRun(
                 script.handle,
-                0usize,
+                0_usize,
                 script.source_url.handle,
                 _JsParseScriptAttributes_JsParseScriptAttributeNone,
                 &mut result,

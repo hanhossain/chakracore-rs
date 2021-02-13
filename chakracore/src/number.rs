@@ -66,7 +66,7 @@ impl TryInto<f64> for JsNumber {
     type Error = JsError;
 
     fn try_into(self) -> Result<f64, Self::Error> {
-        let mut result = 0f64;
+        let mut result = 0_f64;
         let res = unsafe { JsNumberToDouble(self.handle, &mut result as *mut _) };
         JsError::assert(res)?;
 
