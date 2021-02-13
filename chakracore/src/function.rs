@@ -13,7 +13,7 @@ unsafe extern "C" fn handler(
     callback_state: *mut c_void,
 ) -> JsValueRef {
     let context = JsFunctionContext { argument_count };
-    let closure: &mut Box<dyn FnMut(JsFunctionContext)> = std::mem::transmute(callback_state);
+    let closure = &mut *(callback_state as *mut Box<dyn FnMut(JsFunctionContext)>);
     closure(context);
 
     ptr::null_mut()
