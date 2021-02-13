@@ -54,7 +54,12 @@ pub struct JsRuntime {
 
 impl JsRuntime {
     /// Create a new `JsRuntime`
-    pub fn new(attributes: JsRuntimeAttributes) -> Result<Self, JsError> {
+    pub fn new() -> Result<Self, JsError> {
+        JsRuntime::with_attributes(JsRuntimeAttributes::None)
+    }
+
+    /// Create a new `JsRuntime` with attributes
+    pub fn with_attributes(attributes: JsRuntimeAttributes) -> Result<Self, JsError> {
         let mut runtime: JsRuntimeHandle = ptr::null_mut();
         let res = unsafe { JsCreateRuntime(attributes.bits, None, &mut runtime) };
         JsError::assert(res)?;
@@ -100,13 +105,13 @@ mod tests {
 
     #[test]
     fn create_runtime() {
-        let runtime = JsRuntime::new(JsRuntimeAttributes::None);
+        let runtime = JsRuntime::new();
         assert_eq!(runtime.map(|x| x.handle.is_null()), Ok(false));
     }
 
     #[test]
     fn run_script() {
-        let mut runtime = JsRuntime::new(JsRuntimeAttributes::None).unwrap();
+        let mut runtime = JsRuntime::new().unwrap();
         let mut context = JsScriptContext::new(&mut runtime).unwrap();
         context.set_current_context().unwrap();
 
@@ -116,7 +121,7 @@ mod tests {
 
     #[test]
     fn run_script_with_string_result() {
-        let mut runtime = JsRuntime::new(JsRuntimeAttributes::None).unwrap();
+        let mut runtime = JsRuntime::new().unwrap();
         let mut context = JsScriptContext::new(&mut runtime).unwrap();
         context.set_current_context().unwrap();
 
@@ -128,7 +133,7 @@ mod tests {
 
     #[test]
     fn run_script_with_int_result() {
-        let mut runtime = JsRuntime::new(JsRuntimeAttributes::None).unwrap();
+        let mut runtime = JsRuntime::new().unwrap();
         let mut context = JsScriptContext::new(&mut runtime).unwrap();
         context.set_current_context().unwrap();
 
@@ -140,7 +145,7 @@ mod tests {
 
     #[test]
     fn run_script_with_double_result() {
-        let mut runtime = JsRuntime::new(JsRuntimeAttributes::None).unwrap();
+        let mut runtime = JsRuntime::new().unwrap();
         let mut context = JsScriptContext::new(&mut runtime).unwrap();
         context.set_current_context().unwrap();
 
@@ -152,7 +157,7 @@ mod tests {
 
     #[test]
     fn run_script_with_bool_result() {
-        let mut runtime = JsRuntime::new(JsRuntimeAttributes::None).unwrap();
+        let mut runtime = JsRuntime::new().unwrap();
         let mut context = JsScriptContext::new(&mut runtime).unwrap();
         context.set_current_context().unwrap();
 

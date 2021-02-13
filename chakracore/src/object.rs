@@ -78,12 +78,12 @@ mod tests {
     use super::*;
     use crate::context::JsScriptContext;
     use crate::number::JsNumber;
-    use crate::runtime::{JsRuntime, JsRuntimeAttributes};
+    use crate::runtime::JsRuntime;
     use std::convert::{TryFrom, TryInto};
 
     #[test]
     fn create_object() {
-        let mut runtime = JsRuntime::new(JsRuntimeAttributes::None).unwrap();
+        let mut runtime = JsRuntime::new().unwrap();
         let mut context = JsScriptContext::new(&mut runtime).unwrap();
         context.set_current_context().unwrap();
 
@@ -93,7 +93,7 @@ mod tests {
 
     #[test]
     fn get_global_object() {
-        let mut runtime = JsRuntime::new(JsRuntimeAttributes::None).unwrap();
+        let mut runtime = JsRuntime::new().unwrap();
         let mut context = JsScriptContext::new(&mut runtime).unwrap();
         context.set_current_context().unwrap();
 
@@ -103,7 +103,7 @@ mod tests {
 
     #[test]
     fn has_property_string() {
-        let mut runtime = JsRuntime::new(JsRuntimeAttributes::None).unwrap();
+        let mut runtime = JsRuntime::new().unwrap();
         let mut context = JsScriptContext::new(&mut runtime).unwrap();
         context.set_current_context().unwrap();
 
@@ -115,7 +115,7 @@ mod tests {
 
     #[test]
     fn set_property_object() {
-        let mut runtime = JsRuntime::new(JsRuntimeAttributes::None).unwrap();
+        let mut runtime = JsRuntime::new().unwrap();
         let mut context = JsScriptContext::new(&mut runtime).unwrap();
         context.set_current_context().unwrap();
 
@@ -129,7 +129,7 @@ mod tests {
 
     #[test]
     fn get_property_number() {
-        let mut runtime = JsRuntime::new(JsRuntimeAttributes::None).unwrap();
+        let mut runtime = JsRuntime::new().unwrap();
         let mut context = JsScriptContext::new(&mut runtime).unwrap();
         context.set_current_context().unwrap();
 
@@ -146,7 +146,7 @@ mod tests {
 
     #[test]
     fn delete_property_string() {
-        let mut runtime = JsRuntime::new(JsRuntimeAttributes::None).unwrap();
+        let mut runtime = JsRuntime::new().unwrap();
         let mut context = JsScriptContext::new(&mut runtime).unwrap();
         context.set_current_context().unwrap();
 

@@ -55,13 +55,13 @@ impl Into<JsValue> for JsBoolean {
 #[cfg(test)]
 mod tests {
     use crate::context::JsScriptContext;
-    use crate::runtime::{JsRuntime, JsRuntimeAttributes};
+    use crate::runtime::JsRuntime;
 
     use super::*;
 
     #[test]
     fn convert_from_bool() {
-        let mut runtime = JsRuntime::new(JsRuntimeAttributes::None).unwrap();
+        let mut runtime = JsRuntime::new().unwrap();
         let mut context = JsScriptContext::new(&mut runtime).unwrap();
         context.set_current_context().unwrap();
 
@@ -71,7 +71,7 @@ mod tests {
 
     #[test]
     fn convert_to_bool() {
-        let mut runtime = JsRuntime::new(JsRuntimeAttributes::None).unwrap();
+        let mut runtime = JsRuntime::new().unwrap();
         let mut context = JsScriptContext::new(&mut runtime).unwrap();
         context.set_current_context().unwrap();
 

@@ -54,11 +54,10 @@ impl Drop for JsScriptContext {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::runtime::JsRuntimeAttributes;
 
     #[test]
     fn create_context() {
-        let mut runtime = JsRuntime::new(JsRuntimeAttributes::None).unwrap();
+        let mut runtime = JsRuntime::new().unwrap();
         let context = JsScriptContext::new(&mut runtime);
 
         assert_eq!(context.map(|x| x.context.is_null()), Ok(false));
@@ -66,7 +65,7 @@ mod tests {
 
     #[test]
     fn set_context() {
-        let mut runtime = JsRuntime::new(JsRuntimeAttributes::None).unwrap();
+        let mut runtime = JsRuntime::new().unwrap();
         let mut context = JsScriptContext::new(&mut runtime).unwrap();
         let res = context.set_current_context();
 
