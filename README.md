@@ -5,6 +5,8 @@ See [JSRT Reference](https://github.com/chakra-core/ChakraCore/wiki/JavaScript-R
 
 ## Important Todos:
 - [ ] A nice way to add functions to an object (like `console.log('hello world')`)
+- [ ] Remove /usr/local/lib/libChakraCore.dylib
+- [ ] Pull in a static chakracore lib through a git submodule 
 
 ## JSRT Typedef References:
 
