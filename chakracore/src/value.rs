@@ -1,4 +1,5 @@
 use crate::error::JsError;
+use crate::handle::IntoHandle;
 use chakracore_sys::{JsGetValueType, JsValueRef};
 
 #[derive(Debug, Eq, PartialEq)]
@@ -44,6 +45,14 @@ impl JsValue {
             12 => JsType::DataView,
             _ => unreachable!(),
         })
+    }
+}
+
+impl<T: IntoHandle> From<T> for JsValue {
+    fn from(source: T) -> Self {
+        JsValue {
+            handle: source.into_handle(),
+        }
     }
 }
 

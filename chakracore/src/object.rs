@@ -1,5 +1,6 @@
 use crate::boolean::JsBoolean;
 use crate::error::JsError;
+use crate::handle::IntoHandle;
 use crate::string::JsString;
 use crate::value::JsValue;
 use chakracore_sys::{
@@ -65,11 +66,9 @@ impl JsObject {
     }
 }
 
-impl Into<JsValue> for JsObject {
-    fn into(self) -> JsValue {
-        JsValue {
-            handle: self.handle,
-        }
+impl IntoHandle for JsObject {
+    fn into_handle(self) -> JsValueRef {
+        self.handle
     }
 }
 

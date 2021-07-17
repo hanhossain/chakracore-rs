@@ -1,4 +1,5 @@
 use crate::error::JsError;
+use crate::handle::IntoHandle;
 use crate::value::JsValue;
 use chakracore_sys::{JsCreateFunction, JsValueRef};
 use std::ffi::c_void;
@@ -56,11 +57,9 @@ impl JsFunction {
     }
 }
 
-impl Into<JsValue> for JsFunction {
-    fn into(self) -> JsValue {
-        JsValue {
-            handle: self.handle,
-        }
+impl IntoHandle for JsFunction {
+    fn into_handle(self) -> JsValueRef {
+        self.handle
     }
 }
 

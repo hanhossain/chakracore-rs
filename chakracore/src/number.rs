@@ -1,4 +1,5 @@
 use crate::error::JsError;
+use crate::handle::IntoHandle;
 use crate::value::JsValue;
 use chakracore_sys::{
     JsConvertValueToNumber, JsDoubleToNumber, JsIntToNumber, JsNumberToDouble, JsNumberToInt,
@@ -74,11 +75,9 @@ impl TryInto<f64> for JsNumber {
     }
 }
 
-impl Into<JsValue> for JsNumber {
-    fn into(self) -> JsValue {
-        JsValue {
-            handle: self.handle,
-        }
+impl IntoHandle for JsNumber {
+    fn into_handle(self) -> JsValueRef {
+        self.handle
     }
 }
 

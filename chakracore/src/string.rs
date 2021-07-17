@@ -1,4 +1,5 @@
 use crate::error::JsError;
+use crate::handle::IntoHandle;
 use crate::value::JsValue;
 use chakracore_sys::{JsConvertValueToString, JsCopyString, JsCreateString, JsValueRef};
 use std::convert::{TryFrom, TryInto};
@@ -59,11 +60,9 @@ impl TryFrom<JsValue> for JsString {
     }
 }
 
-impl Into<JsValue> for JsString {
-    fn into(self) -> JsValue {
-        JsValue {
-            handle: self.handle,
-        }
+impl IntoHandle for JsString {
+    fn into_handle(self) -> JsValueRef {
+        self.handle
     }
 }
 
