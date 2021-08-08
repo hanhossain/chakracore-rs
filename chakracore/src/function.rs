@@ -28,6 +28,11 @@ unsafe extern "C" fn handler(
     let closure = &mut *(callback_state as *mut Box<dyn FnMut(JsFunctionContext)>);
     closure(context);
 
+    // TODO: need a way to return a result
+    // e.g.
+    // function sum(a, b) {
+    //     return a + b;
+    // }
     ptr::null_mut()
 }
 
@@ -67,11 +72,13 @@ impl IntoHandle for JsFunction {
 mod tests {
     use super::*;
     use crate::context::JsScriptContext;
+    use crate::number::JsNumber;
     use crate::object::JsObject;
     use crate::runtime::JsRuntime;
     use crate::script::JsScript;
     use crate::string::JsString;
     use crate::value::JsType;
+    use std::convert::{TryFrom, TryInto};
 
     #[test]
     fn create_function() {
@@ -104,13 +111,19 @@ mod tests {
         let mut argument_count = 0;
         let mut argument_types = Vec::new();
         let mut is_construct_call = true;
+        let mut a: Vec<i32> = Vec::new();
 
-        // TODO: need to assert the arguments are correct
-        // TODO: will require messing with the Js models though
         let custom_handler = |c: JsFunctionContext| {
             argument_count = c.argument_count;
             argument_types = c.arguments.iter().map(|x| x.get_type()).collect();
             is_construct_call = c.is_construct_call;
+            a = c
+                .arguments
+                .into_iter()
+                .skip(1)
+                .map(|x| JsNumber { handle: x.handle })
+                .map(|x| x.try_into().unwrap())
+                .collect();
         };
 
         let hello_world = JsFunction::new(Box::new(custom_handler)).unwrap();
@@ -134,5 +147,29 @@ mod tests {
             ]
         );
         assert!(!is_construct_call);
+
+        assert_eq!(a, vec![1, 2, 3, 4]);
+    }
+
+    fn hello_world_handle(context: JsFunctionContext) {
+        if let Some(value) = context.arguments.into_iter().nth(1) {
+            let value = JsString::try_from(value).unwrap();
+            assert_eq!(&value.to_string().unwrap(), "hello world");
+        }
+    }
+
+    #[test]
+    fn create_hello_world_function() {
+        let mut runtime = JsRuntime::new().unwrap();
+        let mut context = JsScriptContext::new(&mut runtime).unwrap();
+        context.set_current_context().unwrap();
+
+        let log = JsFunction::new(Box::new(hello_world_handle)).unwrap();
+        let key = JsString::new("log").unwrap();
+        let mut global = JsObject::global().unwrap();
+        global.set_property(&key, log).unwrap();
+
+        let script = JsScript::new("test", "log('hello world')").unwrap();
+        runtime.run_script(&script).unwrap();
     }
 }
