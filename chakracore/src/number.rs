@@ -99,13 +99,13 @@ mod tests {
 
     #[test]
     fn convert_from_double() {
-        let number = JsNumber::try_from(3.14).unwrap();
+        let number = JsNumber::try_from(std::f64::consts::PI).unwrap();
         assert!(!number.handle.is_null());
     }
 
     #[test]
     fn convert_to_double() {
-        let number = JsNumber::try_from(3.14).unwrap();
-        assert_eq!(number.try_into(), Ok(3.14));
+        let number = JsNumber::try_from(std::f64::consts::PI).unwrap();
+        assert_eq!(number.try_into(), Ok(std::f64::consts::PI));
     }
 }
