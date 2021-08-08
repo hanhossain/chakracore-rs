@@ -4,7 +4,8 @@ Targets release `v1.11.24`.
 See [JSRT Reference](https://github.com/chakra-core/ChakraCore/wiki/JavaScript-Runtime-%28JSRT%29-Reference) for the raw API.
 
 ## Important Todos:
-- [ ] A nice way to add functions to an object (like `console.log('hello world')`)
+- [x] A nice way to add functions to an object (like `console.log('hello world')`)
+- [ ] A way to add functions that can return a value to an object (to allow something like `var a = sum(1, 2)`)
 - [ ] Remove /usr/local/lib/libChakraCore.dylib
 - [ ] Pull in a static chakracore lib through a git submodule 
 
