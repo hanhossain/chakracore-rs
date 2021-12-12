@@ -4,9 +4,9 @@ use crate::value::JsValue;
 use chakracore_sys::{JsConvertValueToString, JsCopyString, JsCreateString, JsValueRef};
 use std::convert::{TryFrom, TryInto};
 use std::ffi::{CStr, CString};
+use std::fmt::{Debug, Formatter};
 use std::ptr;
 
-#[derive(Debug)]
 pub struct JsString {
     pub(crate) handle: JsValueRef,
 }
@@ -66,6 +66,13 @@ impl IntoHandle for JsString {
     }
 }
 
+impl Debug for JsString {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let result = self.to_string();
+        f.debug_struct("JsBoolean").field("value", &result).finish()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -79,6 +86,7 @@ mod tests {
         context.set_current_context().unwrap();
 
         let s = JsString::new("hello world!");
+        println!("hi: {:?}", s);
         assert_eq!(s.map(|x| x.handle.is_null()), Ok(false));
     }
 

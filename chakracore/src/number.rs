@@ -6,9 +6,9 @@ use chakracore_sys::{
     JsValueRef,
 };
 use std::convert::{TryFrom, TryInto};
+use std::fmt::{Debug, Formatter};
 use std::ptr;
 
-#[derive(Debug)]
 pub struct JsNumber {
     pub(crate) handle: JsValueRef,
 }
@@ -78,6 +78,18 @@ impl TryInto<f64> for JsNumber {
 impl IntoHandle for JsNumber {
     fn into_handle(self) -> JsValueRef {
         self.handle
+    }
+}
+
+impl Debug for JsNumber {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let mut result = 0_f64;
+        let res = unsafe { JsNumberToDouble(self.handle, &mut result as *mut _) };
+        let error = JsError::assert(res);
+
+        f.debug_struct("JsNumber")
+            .field("value", &error.and(Ok(result)))
+            .finish()
     }
 }
 

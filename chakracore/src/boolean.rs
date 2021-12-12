@@ -3,6 +3,7 @@ use crate::handle::IntoHandle;
 use crate::value::JsValue;
 use chakracore_sys::{JsBoolToBoolean, JsBooleanToBool, JsConvertValueToBoolean, JsValueRef};
 use std::convert::{TryFrom, TryInto};
+use std::fmt::{Debug, Formatter};
 use std::ptr;
 
 pub struct JsBoolean {
@@ -48,6 +49,18 @@ impl TryFrom<JsValue> for JsBoolean {
 impl IntoHandle for JsBoolean {
     fn into_handle(self) -> JsValueRef {
         self.handle
+    }
+}
+
+impl Debug for JsBoolean {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let mut result = false;
+        let res = unsafe { JsBooleanToBool(self.handle, &mut result as *mut _) };
+        let error = JsError::assert(res);
+
+        f.debug_struct("JsBoolean")
+            .field("value", &error.and(Ok(result)))
+            .finish()
     }
 }
 
