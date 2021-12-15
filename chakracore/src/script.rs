@@ -8,7 +8,6 @@ use std::ptr;
 pub struct JsScript {
     pub(crate) handle: JsValueRef,
     pub(crate) source_url: JsString,
-    size: usize,
     raw: *mut i8,
 }
 
@@ -39,7 +38,6 @@ impl JsScript {
         Ok(Self {
             handle: source,
             source_url: JsString::new(url)?,
-            size,
             raw: script,
         })
     }
