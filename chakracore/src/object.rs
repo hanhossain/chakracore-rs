@@ -7,7 +7,6 @@ use chakracore_sys::{
     JsCreateObject, JsGetGlobalObject, JsObjectDeleteProperty, JsObjectGetProperty,
     JsObjectHasProperty, JsObjectSetProperty, JsValueRef,
 };
-use std::convert::{TryFrom, TryInto};
 use std::ptr;
 
 #[derive(Debug)]
@@ -78,7 +77,6 @@ mod tests {
     use crate::context::JsScriptContext;
     use crate::number::JsNumber;
     use crate::runtime::JsRuntime;
-    use std::convert::{TryFrom, TryInto};
 
     #[test]
     fn create_object() {

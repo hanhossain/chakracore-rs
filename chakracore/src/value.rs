@@ -63,7 +63,6 @@ mod tests {
     use crate::context::JsScriptContext;
     use crate::number::JsNumber;
     use crate::runtime::JsRuntime;
-    use std::convert::TryFrom;
 
     #[test]
     fn get_type_number() {

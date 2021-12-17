@@ -9,7 +9,6 @@ include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::convert::TryInto;
     use std::ffi::{c_void, CStr, CString};
     use std::os::raw::c_ushort;
     use std::ptr;

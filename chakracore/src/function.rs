@@ -117,7 +117,6 @@ mod tests {
     use crate::script::JsScript;
     use crate::string::JsString;
     use crate::value::JsType;
-    use std::convert::{TryFrom, TryInto};
 
     #[test]
     fn create_function() {

@@ -5,7 +5,6 @@ use chakracore_sys::{
     JsConvertValueToNumber, JsDoubleToNumber, JsIntToNumber, JsNumberToDouble, JsNumberToInt,
     JsValueRef,
 };
-use std::convert::{TryFrom, TryInto};
 use std::fmt::{Debug, Formatter};
 use std::ptr;
 

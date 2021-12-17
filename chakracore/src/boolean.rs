@@ -2,7 +2,6 @@ use crate::error::JsError;
 use crate::handle::IntoHandle;
 use crate::value::JsValue;
 use chakracore_sys::{JsBoolToBoolean, JsBooleanToBool, JsConvertValueToBoolean, JsValueRef};
-use std::convert::{TryFrom, TryInto};
 use std::fmt::{Debug, Formatter};
 use std::ptr;
 

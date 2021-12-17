@@ -100,7 +100,6 @@ mod tests {
     use crate::context::JsScriptContext;
     use crate::number::JsNumber;
     use crate::string::JsString;
-    use std::convert::{TryFrom, TryInto};
 
     #[test]
     fn create_runtime() {
