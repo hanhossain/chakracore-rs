@@ -67,7 +67,6 @@ impl JsRuntime {
         Ok(Self { handle: runtime })
     }
 
-    #[allow(clippy::unused_self)]
     pub fn run_script(&mut self, script: &JsScript) -> Result<JsValue, JsError> {
         let mut result = ptr::null_mut();
         let res = unsafe {
