@@ -334,4 +334,105 @@ mod tests {
             assert!(BASIC_LOGGING_WITH_CALLBACK_DONE);
         }
     }
+
+    unsafe extern "C" fn handler_with_return(
+        _callee: JsValueRef,
+        _is_construct_call: bool,
+        _arguments: *mut JsValueRef,
+        _argument_count: c_ushort,
+        _callback_state: *mut c_void,
+    ) -> JsValueRef {
+        let mut value = ptr::null_mut();
+        assert_no_error(JsIntToNumber(42, &mut value));
+        value
+    }
+
+    #[test]
+    fn handler_returns_something() {
+        let script = "getValue()";
+        let script_c = CString::new(script).unwrap().into_raw();
+
+        unsafe {
+            let mut runtime: JsRuntimeHandle = ptr::null_mut();
+            let mut context: JsContextRef = ptr::null_mut();
+
+            // Create a runtime.
+            let res = JsCreateRuntime(
+                _JsRuntimeAttributes_JsRuntimeAttributeNone,
+                None,
+                &mut runtime,
+            );
+            assert_no_error(res);
+
+            // Create an execution context.
+            let res = JsCreateContext(runtime, &mut context);
+            assert_no_error(res);
+
+            // Now set the current execution context.
+            let res = JsSetCurrentContext(context);
+            assert_no_error(res);
+
+            // set handler
+            let mut handler = ptr::null_mut();
+            assert_no_error(JsCreateFunction(
+                Some(handler_with_return),
+                ptr::null_mut(),
+                &mut handler,
+            ));
+            let func_string = CString::new("getValue").unwrap();
+            let mut func_name = ptr::null_mut();
+            assert_no_error(JsCreatePropertyId(
+                func_string.as_ptr(),
+                func_string.as_bytes().len() as u64,
+                &mut func_name,
+            ));
+
+            // set func as global
+            let mut global = ptr::null_mut();
+            assert_no_error(JsGetGlobalObject(&mut global));
+            assert_no_error(JsSetProperty(global, func_name, handler, true));
+
+            let mut fname = ptr::null_mut();
+            let sample = CString::new("sample").unwrap();
+            let res = JsCreateString(sample.as_ptr(), 6, &mut fname);
+            assert_no_error(res);
+
+            let mut script_source = ptr::null_mut();
+            let res = JsCreateExternalArrayBuffer(
+                script_c as *mut _,
+                script.len() as u32,
+                None,
+                ptr::null_mut(),
+                &mut script_source,
+            );
+            assert_no_error(res);
+
+            // run the script
+            let mut result = ptr::null_mut();
+            let res = JsRun(
+                script_source as *mut _,
+                0usize,
+                fname as *mut _,
+                _JsParseScriptAttributes_JsParseScriptAttributeNone,
+                &mut result,
+            );
+            assert_no_error(res);
+
+            // convert result to int
+            let mut int_result = 0;
+            assert_no_error(JsNumberToInt(result, &mut int_result as *mut _));
+            assert_eq!(int_result, 42);
+
+            // release script_c memory
+            let _ = CString::from_raw(script_c);
+
+            // clear current context
+            let res = JsSetCurrentContext(ptr::null_mut());
+            assert_no_error(res);
+
+            // dispose runtime
+            let res = JsDisposeRuntime(runtime);
+            assert_no_error(res);
+        }
+    }
 }
