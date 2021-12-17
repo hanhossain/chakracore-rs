@@ -14,7 +14,7 @@ See [JSRT Reference](https://github.com/chakra-core/ChakraCore/wiki/JavaScript-R
   - [ ] returns u64
   - [ ] returns usize
   - [ ] returns f32
-  - [ ] returns f64
+  - [x] returns f64
   - [ ] other types?
 - [ ] Remove /usr/local/lib/libChakraCore.dylib
 - [ ] Pull in a static chakracore lib through a git submodule

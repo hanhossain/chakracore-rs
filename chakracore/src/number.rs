@@ -92,6 +92,18 @@ impl Debug for JsNumber {
     }
 }
 
+impl IntoHandle for i32 {
+    fn into_handle(self) -> JsValueRef {
+        JsNumber::try_from(self).unwrap().into_handle()
+    }
+}
+
+impl IntoHandle for f64 {
+    fn into_handle(self) -> JsValueRef {
+        JsNumber::try_from(self).unwrap().into_handle()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

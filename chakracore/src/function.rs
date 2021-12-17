@@ -1,6 +1,5 @@
 use crate::error::JsError;
 use crate::handle::IntoHandle;
-use crate::number::JsNumber;
 use crate::value::JsValue;
 use chakracore_sys::{JsCreateFunction, JsValueRef};
 use std::ffi::c_void;
@@ -8,7 +7,7 @@ use std::marker::PhantomData;
 use std::os::raw::c_ushort;
 use std::ptr;
 
-unsafe extern "C" fn handler_unit(
+unsafe extern "C" fn handler<T: IntoHandle>(
     _callee: JsValueRef, // TODO: what should we do with the callee?
     is_construct_call: bool,
     arguments: *mut JsValueRef,
@@ -16,22 +15,8 @@ unsafe extern "C" fn handler_unit(
     callback_state: *mut c_void,
 ) -> JsValueRef {
     let context = JsFunctionContext::new(argument_count, arguments, is_construct_call);
-    let closure = &mut *(callback_state as *mut Box<dyn FnMut(JsFunctionContext)>);
-    closure(context);
-    ptr::null_mut()
-}
-
-unsafe extern "C" fn handler_i32(
-    _callee: JsValueRef, // TODO: what should we do with the callee?
-    is_construct_call: bool,
-    arguments: *mut JsValueRef,
-    argument_count: c_ushort,
-    callback_state: *mut c_void,
-) -> JsValueRef {
-    let context = JsFunctionContext::new(argument_count, arguments, is_construct_call);
-    let closure = &mut *(callback_state as *mut Box<dyn FnMut(JsFunctionContext) -> i32>);
-    let result: i32 = closure(context);
-    JsNumber::try_from(result).unwrap().handle
+    let closure = &mut *(callback_state as *mut Box<dyn FnMut(JsFunctionContext) -> T>);
+    closure(context).into_handle()
 }
 
 pub struct JsFunctionContext {
@@ -58,20 +43,20 @@ impl JsFunctionContext {
 }
 
 #[derive(Debug)]
-pub struct JsFunction<T> {
+pub struct JsFunction<T: IntoHandle> {
     handle: JsValueRef,
     _marker: PhantomData<T>,
 }
 
-impl JsFunction<()> {
-    pub fn new<'a>(callback: Box<dyn FnMut(JsFunctionContext) + 'a>) -> Result<Self, JsError> {
+impl<T: IntoHandle> JsFunction<T> {
+    pub fn new<'a>(callback: Box<dyn FnMut(JsFunctionContext) -> T + 'a>) -> Result<Self, JsError> {
         let callback = Box::new(callback);
 
         // TODO: don't forget to drop this later
         let callback = Box::into_raw(callback);
 
         let mut func = ptr::null_mut();
-        let res = unsafe { JsCreateFunction(Some(handler_unit), callback as *mut _, &mut func) };
+        let res = unsafe { JsCreateFunction(Some(handler::<T>), callback as *mut _, &mut func) };
         JsError::assert(res)?;
 
         Ok(Self {
@@ -81,27 +66,7 @@ impl JsFunction<()> {
     }
 }
 
-impl JsFunction<i32> {
-    pub fn new<'a>(
-        callback: Box<dyn FnMut(JsFunctionContext) -> i32 + 'a>,
-    ) -> Result<Self, JsError> {
-        let callback = Box::new(callback);
-
-        // TODO: don't forget to drop this later
-        let callback = Box::into_raw(callback);
-
-        let mut func = ptr::null_mut();
-        let res = unsafe { JsCreateFunction(Some(handler_i32), callback as *mut _, &mut func) };
-        JsError::assert(res)?;
-
-        Ok(Self {
-            handle: func,
-            _marker: PhantomData,
-        })
-    }
-}
-
-impl<T> IntoHandle for JsFunction<T> {
+impl<T: IntoHandle> IntoHandle for JsFunction<T> {
     fn into_handle(self) -> JsValueRef {
         self.handle
     }
@@ -234,6 +199,25 @@ mod tests {
         let script = JsScript::new("test", "helloWorld(1, 2)").unwrap();
         let result: JsNumber = runtime.run_script(&script).unwrap().try_into().unwrap();
         assert_eq!(Ok(3), result.try_into());
+    }
+
+    #[test]
+    fn create_function_returns_f64() {
+        let mut runtime = JsRuntime::new().unwrap();
+        let mut context = JsScriptContext::new(&mut runtime).unwrap();
+        context.set_current_context().unwrap();
+
+        let custom_handler = |_| 42f64;
+
+        let hello_world = JsFunction::<f64>::new(Box::new(custom_handler)).unwrap();
+        let key = JsString::new("helloWorld").unwrap();
+
+        let mut global = JsObject::global().unwrap();
+        global.set_property(&key, hello_world).unwrap();
+
+        let script = JsScript::new("test", "helloWorld()").unwrap();
+        let result: JsNumber = runtime.run_script(&script).unwrap().try_into().unwrap();
+        assert_eq!(Ok(42), result.try_into());
     }
 
     fn hello_world_handle(context: JsFunctionContext) {

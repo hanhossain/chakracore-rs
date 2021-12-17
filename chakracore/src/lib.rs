@@ -8,4 +8,5 @@ pub mod object;
 pub mod runtime;
 pub mod script;
 pub mod string;
+pub mod undefined;
 pub mod value;
