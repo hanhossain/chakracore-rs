@@ -1,5 +1,4 @@
 use crate::error::JsError;
-use crate::handle::IntoHandle;
 use crate::value::JsValue;
 use chakracore_sys::{JsBoolToBoolean, JsBooleanToBool, JsConvertValueToBoolean, JsValueRef};
 use std::fmt::{Debug, Formatter};
@@ -45,9 +44,11 @@ impl TryFrom<JsValue> for JsBoolean {
     }
 }
 
-impl IntoHandle for JsBoolean {
-    fn into_handle(self) -> JsValueRef {
-        self.handle
+impl Into<JsValue> for JsBoolean {
+    fn into(self) -> JsValue {
+        JsValue {
+            handle: self.handle,
+        }
     }
 }
 

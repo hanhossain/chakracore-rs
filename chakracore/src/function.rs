@@ -1,5 +1,4 @@
 use crate::error::JsError;
-use crate::handle::IntoHandle;
 use crate::value::JsValue;
 use chakracore_sys::{JsCreateFunction, JsValueRef};
 use std::ffi::c_void;
@@ -7,7 +6,7 @@ use std::marker::PhantomData;
 use std::os::raw::c_ushort;
 use std::ptr;
 
-unsafe extern "C" fn handler<T: IntoHandle>(
+unsafe extern "C" fn handler<T: Into<JsValue>>(
     _callee: JsValueRef, // TODO: what should we do with the callee?
     is_construct_call: bool,
     arguments: *mut JsValueRef,
@@ -16,7 +15,7 @@ unsafe extern "C" fn handler<T: IntoHandle>(
 ) -> JsValueRef {
     let context = JsFunctionContext::new(argument_count, arguments, is_construct_call);
     let closure = &mut *(callback_state as *mut Box<dyn FnMut(JsFunctionContext) -> T>);
-    closure(context).into_handle()
+    closure(context).into().handle
 }
 
 pub struct JsFunctionContext {
@@ -43,12 +42,12 @@ impl JsFunctionContext {
 }
 
 #[derive(Debug)]
-pub struct JsFunction<T: IntoHandle> {
+pub struct JsFunction<T: Into<JsValue>> {
     handle: JsValueRef,
     _marker: PhantomData<T>,
 }
 
-impl<T: IntoHandle> JsFunction<T> {
+impl<T: Into<JsValue>> JsFunction<T> {
     pub fn new<'a>(callback: Box<dyn FnMut(JsFunctionContext) -> T + 'a>) -> Result<Self, JsError> {
         let callback = Box::new(callback);
 
@@ -66,9 +65,11 @@ impl<T: IntoHandle> JsFunction<T> {
     }
 }
 
-impl<T: IntoHandle> IntoHandle for JsFunction<T> {
-    fn into_handle(self) -> JsValueRef {
-        self.handle
+impl<T: Into<JsValue>> Into<JsValue> for JsFunction<T> {
+    fn into(self) -> JsValue {
+        JsValue {
+            handle: self.handle,
+        }
     }
 }
 

@@ -1,9 +1,10 @@
-use crate::handle::IntoHandle;
-use chakracore_sys::JsValueRef;
+use crate::value::JsValue;
 use std::ptr;
 
-impl IntoHandle for () {
-    fn into_handle(self) -> JsValueRef {
-        ptr::null_mut()
+impl Into<JsValue> for () {
+    fn into(self) -> JsValue {
+        JsValue {
+            handle: ptr::null_mut(),
+        }
     }
 }
