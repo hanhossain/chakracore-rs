@@ -11,29 +11,23 @@ pub struct JsNumber {
     pub(crate) handle: JsValueRef,
 }
 
-impl TryFrom<i32> for JsNumber {
-    type Error = JsError;
-
-    fn try_from(value: i32) -> Result<Self, Self::Error> {
+impl From<i32> for JsNumber {
+    fn from(value: i32) -> Self {
         let mut result = ptr::null_mut();
-
         let res = unsafe { JsIntToNumber(value, &mut result) };
-        JsError::assert(res)?;
-
-        Ok(Self { handle: result })
+        JsError::assert(res).unwrap();
+        Self { handle: result }
     }
 }
 
-impl TryFrom<f64> for JsNumber {
-    type Error = JsError;
-
-    fn try_from(value: f64) -> Result<Self, Self::Error> {
+impl From<f64> for JsNumber {
+    fn from(value: f64) -> Self {
         let mut result = ptr::null_mut();
 
         let res = unsafe { JsDoubleToNumber(value, &mut result) };
-        JsError::assert(res)?;
+        JsError::assert(res).unwrap();
 
-        Ok(Self { handle: result })
+        Self { handle: result }
     }
 }
 
@@ -49,24 +43,24 @@ impl TryFrom<JsValue> for JsNumber {
     }
 }
 
-impl TryInto<i32> for JsNumber {
+impl TryFrom<JsNumber> for i32 {
     type Error = JsError;
 
-    fn try_into(self) -> Result<i32, Self::Error> {
+    fn try_from(value: JsNumber) -> Result<i32, Self::Error> {
         let mut result = 0;
-        let res = unsafe { JsNumberToInt(self.handle, &mut result as *mut _) };
+        let res = unsafe { JsNumberToInt(value.handle, &mut result as *mut _) };
         JsError::assert(res)?;
 
         Ok(result)
     }
 }
 
-impl TryInto<f64> for JsNumber {
+impl TryFrom<JsNumber> for f64 {
     type Error = JsError;
 
-    fn try_into(self) -> Result<f64, Self::Error> {
+    fn try_from(value: JsNumber) -> Result<f64, Self::Error> {
         let mut result = 0_f64;
-        let res = unsafe { JsNumberToDouble(self.handle, &mut result as *mut _) };
+        let res = unsafe { JsNumberToDouble(value.handle, &mut result as *mut _) };
         JsError::assert(res)?;
 
         Ok(result)
@@ -95,8 +89,7 @@ impl Debug for JsNumber {
 
 impl From<i32> for JsValue {
     fn from(value: i32) -> JsValue {
-        // TODO: int to JsNumber should just be a from, doesn't need try
-        let number = JsNumber::try_from(value).unwrap();
+        let number = JsNumber::from(value);
         JsValue {
             handle: number.handle,
         }
@@ -105,8 +98,7 @@ impl From<i32> for JsValue {
 
 impl From<f64> for JsValue {
     fn from(value: f64) -> JsValue {
-        // TODO: double to JsNumber should just be a from, doesn't need try
-        let number = JsNumber::try_from(value).unwrap();
+        let number = JsNumber::from(value);
         JsValue {
             handle: number.handle,
         }
@@ -119,25 +111,25 @@ mod tests {
 
     #[test]
     fn convert_from_int() {
-        let number = JsNumber::try_from(42).unwrap();
+        let number = JsNumber::from(42);
         assert!(!number.handle.is_null());
     }
 
     #[test]
     fn convert_to_int() {
-        let number = JsNumber::try_from(42).unwrap();
+        let number = JsNumber::from(42);
         assert_eq!(number.try_into(), Ok(42));
     }
 
     #[test]
     fn convert_from_double() {
-        let number = JsNumber::try_from(std::f64::consts::PI).unwrap();
+        let number = JsNumber::from(std::f64::consts::PI);
         assert!(!number.handle.is_null());
     }
 
     #[test]
     fn convert_to_double() {
-        let number = JsNumber::try_from(std::f64::consts::PI).unwrap();
+        let number = JsNumber::from(std::f64::consts::PI);
         assert_eq!(number.try_into(), Ok(std::f64::consts::PI));
     }
 }
