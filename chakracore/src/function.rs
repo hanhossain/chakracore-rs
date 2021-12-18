@@ -93,7 +93,7 @@ mod tests {
 
         let custom_handler = |_| succeeded = true;
 
-        let hello_world = JsFunction::<()>::new(Box::new(custom_handler)).unwrap();
+        let hello_world = JsFunction::new(Box::new(custom_handler)).unwrap();
         let key = JsString::new("helloWorld").unwrap();
 
         let mut global = JsObject::global().unwrap();
@@ -129,7 +129,7 @@ mod tests {
                 .collect();
         };
 
-        let hello_world = JsFunction::<()>::new(Box::new(custom_handler)).unwrap();
+        let hello_world = JsFunction::new(Box::new(custom_handler)).unwrap();
         let key = JsString::new("helloWorld").unwrap();
 
         let mut global = JsObject::global().unwrap();
@@ -162,7 +162,7 @@ mod tests {
 
         let custom_handler = |_| 42;
 
-        let hello_world = JsFunction::<i32>::new(Box::new(custom_handler)).unwrap();
+        let hello_world = JsFunction::new(Box::new(custom_handler)).unwrap();
         let key = JsString::new("helloWorld").unwrap();
 
         let mut global = JsObject::global().unwrap();
@@ -190,7 +190,7 @@ mod tests {
             arguments[0] + arguments[1]
         };
 
-        let hello_world = JsFunction::<i32>::new(Box::new(custom_handler)).unwrap();
+        let hello_world = JsFunction::new(Box::new(custom_handler)).unwrap();
         let key = JsString::new("helloWorld").unwrap();
 
         let mut global = JsObject::global().unwrap();
@@ -209,7 +209,7 @@ mod tests {
 
         let custom_handler = |_| 42f64;
 
-        let hello_world = JsFunction::<f64>::new(Box::new(custom_handler)).unwrap();
+        let hello_world = JsFunction::new(Box::new(custom_handler)).unwrap();
         let key = JsString::new("helloWorld").unwrap();
 
         let mut global = JsObject::global().unwrap();
@@ -233,7 +233,7 @@ mod tests {
         let mut context = JsScriptContext::new(&mut runtime).unwrap();
         context.set_current_context().unwrap();
 
-        let log = JsFunction::<()>::new(Box::new(hello_world_handle)).unwrap();
+        let log = JsFunction::new(Box::new(hello_world_handle)).unwrap();
         let key = JsString::new("log").unwrap();
         let mut global = JsObject::global().unwrap();
         global.set_property(&key, log).unwrap();
