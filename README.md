@@ -4,18 +4,10 @@ Targets release `v1.11.24`.
 See [JSRT Reference](https://github.com/chakra-core/ChakraCore/wiki/JavaScript-Runtime-%28JSRT%29-Reference) for the raw API.
 
 ## Important Todos:
-- [x] A nice way to add functions to an object (like `console.log('hello world')`)
-- [ ] A way to add functions that can return a value to an object (to allow something like `var a = sum(1, 2)`)
-  - [x] returns ()
-  - [x] returns i32
-  - [ ] returns i64
-  - [ ] returns isize
-  - [ ] returns u32
-  - [ ] returns u64
-  - [ ] returns usize
-  - [ ] returns f32
-  - [x] returns f64
-  - [ ] other types?
+- [x] A way to add functions that can return a value to an object (to allow something like `var a = sum(1, 2)`)
+  - [x] returns () (like `console.log('hello world')`)
+  - [x] returns i32 (like `var a = sum(1, 2)`)
+  - [x] returns f64 (like `var a = sqrt(3.14)`)
 - [ ] Remove /usr/local/lib/libChakraCore.dylib
 - [ ] Pull in a static chakracore lib through a git submodule
 - [ ] A way to write a strongly typed handler
