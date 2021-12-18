@@ -1,8 +1,8 @@
 use crate::value::JsValue;
 use std::ptr;
 
-impl Into<JsValue> for () {
-    fn into(self) -> JsValue {
+impl From<()> for JsValue {
+    fn from(_: ()) -> JsValue {
         JsValue {
             handle: ptr::null_mut(),
         }

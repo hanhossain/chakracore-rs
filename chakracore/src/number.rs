@@ -73,10 +73,10 @@ impl TryInto<f64> for JsNumber {
     }
 }
 
-impl Into<JsValue> for JsNumber {
-    fn into(self) -> JsValue {
+impl From<JsNumber> for JsValue {
+    fn from(number: JsNumber) -> JsValue {
         JsValue {
-            handle: self.handle,
+            handle: number.handle,
         }
     }
 }
@@ -93,18 +93,20 @@ impl Debug for JsNumber {
     }
 }
 
-impl Into<JsValue> for i32 {
-    fn into(self) -> JsValue {
-        let number = JsNumber::try_from(self).unwrap();
+impl From<i32> for JsValue {
+    fn from(value: i32) -> JsValue {
+        // TODO: int to JsNumber should just be a from, doesn't need try
+        let number = JsNumber::try_from(value).unwrap();
         JsValue {
             handle: number.handle,
         }
     }
 }
 
-impl Into<JsValue> for f64 {
-    fn into(self) -> JsValue {
-        let number = JsNumber::try_from(self).unwrap();
+impl From<f64> for JsValue {
+    fn from(value: f64) -> JsValue {
+        // TODO: double to JsNumber should just be a from, doesn't need try
+        let number = JsNumber::try_from(value).unwrap();
         JsValue {
             handle: number.handle,
         }

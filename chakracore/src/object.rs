@@ -64,10 +64,10 @@ impl JsObject {
     }
 }
 
-impl Into<JsValue> for JsObject {
-    fn into(self) -> JsValue {
+impl From<JsObject> for JsValue {
+    fn from(object: JsObject) -> JsValue {
         JsValue {
-            handle: self.handle,
+            handle: object.handle,
         }
     }
 }

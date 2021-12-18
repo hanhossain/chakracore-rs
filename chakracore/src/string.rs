@@ -58,10 +58,10 @@ impl TryFrom<JsValue> for JsString {
     }
 }
 
-impl Into<JsValue> for JsString {
-    fn into(self) -> JsValue {
+impl From<JsString> for JsValue {
+    fn from(object: JsString) -> JsValue {
         JsValue {
-            handle: self.handle,
+            handle: object.handle,
         }
     }
 }

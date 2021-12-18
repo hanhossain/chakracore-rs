@@ -44,10 +44,10 @@ impl TryFrom<JsValue> for JsBoolean {
     }
 }
 
-impl Into<JsValue> for JsBoolean {
-    fn into(self) -> JsValue {
+impl From<JsBoolean> for JsValue {
+    fn from(boolean: JsBoolean) -> JsValue {
         JsValue {
-            handle: self.handle,
+            handle: boolean.handle,
         }
     }
 }

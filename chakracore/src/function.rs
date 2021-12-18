@@ -65,10 +65,10 @@ impl<T: Into<JsValue>> JsFunction<T> {
     }
 }
 
-impl<T: Into<JsValue>> Into<JsValue> for JsFunction<T> {
-    fn into(self) -> JsValue {
+impl<T: Into<JsValue>> From<JsFunction<T>> for JsValue {
+    fn from(func: JsFunction<T>) -> JsValue {
         JsValue {
-            handle: self.handle,
+            handle: func.handle,
         }
     }
 }
